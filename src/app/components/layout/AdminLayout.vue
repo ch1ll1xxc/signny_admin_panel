@@ -7,6 +7,7 @@
       </div>
       <nav class="mt-6">
         <router-link
+          v-if="auth.can('dashboard.read')"
           to="/admin/dashboard"
           class="block px-6 py-2 text-gray-700 hover:bg-gray-100"
           active-class="bg-blue-50 text-blue-600 border-r-4 border-blue-600"
