@@ -38,6 +38,7 @@
             View Exhibits
           </router-link>
           <button
+            :disabled="!canWrite"
             class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
           >
             Create Exhibit
@@ -45,13 +46,22 @@
         </div>
       </div>
 
+      <div class="text-sm text-gray-600 bg-gray-100 p-4 rounded-md">
+        Active role: <strong>{{ auth.user?.role || 'unknown' }}</strong>
+      </div>
+
       <div class="text-sm text-gray-500 bg-blue-50 p-4 rounded-md">
-        <p><strong>Note:</strong> This is the foundation scaffold for Slice S1. Additional pages (exhibits list, edit, review, audit) will be added in subsequent slices.</p>
+        <p><strong>Note:</strong> Vue Slice S2 introduces RBAC-aware navigation and actions. Content workflow pages will follow in next slices.</p>
       </div>
     </div>
   </AdminLayout>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import AdminLayout from '../../components/layout/AdminLayout.vue'
+import { useAuth } from '../../composables/useAuth'
+
+const auth = useAuth()
+const canWrite = computed(() => auth.can('exhibits.write'))
 </script>

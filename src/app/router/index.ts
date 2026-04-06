@@ -1,6 +1,10 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import LoginPage from '../pages/admin/LoginPage.vue'
 import DashboardPage from '../pages/admin/DashboardPage.vue'
+import ExhibitsListPage from '../pages/admin/ExhibitsListPage.vue'
+import UnauthorizedPage from '../pages/admin/UnauthorizedPage.vue'
+import type { Permission } from '../domain/auth'
+import { useAuthStore } from '../store/modules/auth'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -25,6 +29,23 @@ const routes: RouteRecordRaw[] = [
     },
   },
   {
+    path: '/admin/exhibits',
+    name: 'AdminExhibits',
+    component: ExhibitsListPage,
+    meta: {
+      requiresAuth: true,
+      requiredPermission: 'exhibits.read',
+    },
+  },
+  {
+    path: '/admin/forbidden',
+    name: 'AdminForbidden',
+    component: UnauthorizedPage,
+    meta: {
+      requiresAuth: true,
+    },
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: DashboardPage,
@@ -38,16 +59,28 @@ const router = createRouter({
 
 // Navigation guard for authentication
 router.beforeEach((to, _from, next) => {
-  const requiresAuth = to.meta.requiresAuth !== false
-  const isLoggedIn = !!localStorage.getItem('session_token')
+  const auth = useAuthStore()
+  auth.hydrate()
 
-  if (requiresAuth && !isLoggedIn) {
+  const requiresAuth = to.meta.requiresAuth !== false
+  const requiredPermission = to.meta.requiredPermission as Permission | undefined
+
+  if (requiresAuth && !auth.isAuthenticated) {
     next({ name: 'AdminLogin', query: { redirect: to.fullPath } })
-  } else if (to.path === '/admin/login' && isLoggedIn) {
-    next({ name: 'AdminDashboard' })
-  } else {
-    next()
+    return
   }
+
+  if (requiredPermission && !auth.can(requiredPermission)) {
+    next({ name: 'AdminForbidden' })
+    return
+  }
+
+  if (to.path === '/admin/login' && auth.isAuthenticated) {
+    next({ name: 'AdminDashboard' })
+    return
+  }
+
+  next()
 })
 
 export default router

@@ -37,16 +37,32 @@
           />
         </div>
 
+        <div>
+          <label for="role" class="block text-sm font-medium text-gray-700">
+            Role
+          </label>
+          <select
+            id="role"
+            v-model="role"
+            class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+          >
+            <option value="admin">Admin</option>
+            <option value="editor">Editor</option>
+            <option value="curator">Curator</option>
+            <option value="analyst">Analyst</option>
+          </select>
+        </div>
+
         <div v-if="errorMessage" class="rounded-md bg-red-50 p-4">
           <p class="text-sm font-medium text-red-800">{{ errorMessage }}</p>
         </div>
 
         <button
           type="submit"
-          :disabled="isLoading"
+          :disabled="auth.isLoading"
           class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
         >
-          <span v-if="!isLoading">Sign in</span>
+          <span v-if="!auth.isLoading">Sign in</span>
           <span v-else>Signing in...</span>
         </button>
       </form>
@@ -61,13 +77,16 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import type { UserRole } from '../../domain/auth'
+import { useAuth } from '../../composables/useAuth'
 
 const router = useRouter()
 const route = useRoute()
+const auth = useAuth()
 
 const email = ref('')
 const password = ref('')
-const isLoading = ref(false)
+const role = ref<UserRole>('editor')
 const errorMessage = ref('')
 
 const handleLogin = async () => {
@@ -76,22 +95,15 @@ const handleLogin = async () => {
     return
   }
 
-  isLoading.value = true
   errorMessage.value = ''
 
   try {
-    // Mock authentication - in real implementation, call API
-    // For scaffold purposes, we just set a session token
-    localStorage.setItem('session_token', `token_${Date.now()}`)
-    localStorage.setItem('user_email', email.value)
+    await auth.login(email.value, role.value)
 
-    // Redirect to dashboard or the originally requested page
     const redirect = route.query.redirect as string
     router.push(redirect || '/admin/dashboard')
-  } catch (error) {
+  } catch {
     errorMessage.value = 'Login failed. Please try again.'
-  } finally {
-    isLoading.value = false
   }
 }
 </script>

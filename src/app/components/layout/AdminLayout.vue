@@ -14,6 +14,7 @@
           Dashboard
         </router-link>
         <router-link
+          v-if="auth.can('exhibits.read')"
           to="/admin/exhibits"
           class="block px-6 py-2 text-gray-700 hover:bg-gray-100"
           active-class="bg-blue-50 text-blue-600 border-r-4 border-blue-600"
@@ -38,7 +39,9 @@
             <slot name="title">Page</slot>
           </h2>
           <div class="text-sm text-gray-500">
-            <slot name="user-info">Admin User</slot>
+            <slot name="user-info">
+              {{ auth.user?.email || 'Admin User' }}
+            </slot>
           </div>
         </div>
       </header>
@@ -55,11 +58,13 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { useAuth } from '../../composables/useAuth'
 
 const router = useRouter()
+const auth = useAuth()
 
 const handleLogout = () => {
-  localStorage.removeItem('session_token')
+  auth.logout()
   router.push('/admin/login')
 }
 </script>
