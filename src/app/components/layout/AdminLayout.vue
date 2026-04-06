@@ -21,6 +21,46 @@
         >
           Exhibits
         </router-link>
+        <router-link
+          v-if="auth.can('media.read')"
+          to="/admin/media"
+          class="block px-6 py-2 text-gray-700 hover:bg-gray-100"
+          active-class="bg-blue-50 text-blue-600 border-r-4 border-blue-600"
+        >
+          Media
+        </router-link>
+        <router-link
+          v-if="auth.can('halls.read')"
+          to="/admin/halls"
+          class="block px-6 py-2 text-gray-700 hover:bg-gray-100"
+          active-class="bg-blue-50 text-blue-600 border-r-4 border-blue-600"
+        >
+          Halls
+        </router-link>
+        <router-link
+          v-if="auth.can('exhibits.read')"
+          to="/admin/review"
+          class="block px-6 py-2 text-gray-700 hover:bg-gray-100"
+          active-class="bg-blue-50 text-blue-600 border-r-4 border-blue-600"
+        >
+          Review
+        </router-link>
+        <router-link
+          v-if="auth.can('audit.read')"
+          to="/admin/audit"
+          class="block px-6 py-2 text-gray-700 hover:bg-gray-100"
+          active-class="bg-blue-50 text-blue-600 border-r-4 border-blue-600"
+        >
+          Audit
+        </router-link>
+        <router-link
+          v-if="auth.can('audit.read')"
+          to="/admin/analytics"
+          class="block px-6 py-2 text-gray-700 hover:bg-gray-100"
+          active-class="bg-blue-50 text-blue-600 border-r-4 border-blue-600"
+        >
+          Analytics
+        </router-link>
         <button
           @click="handleLogout"
           class="w-full text-left px-6 py-2 text-gray-700 hover:bg-gray-100"
