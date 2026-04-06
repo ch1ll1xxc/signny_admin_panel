@@ -14,7 +14,11 @@ import { useAuthStore } from '../store/modules/auth'
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    redirect: '/admin/dashboard',
+    redirect: '/admin/login',
+  },
+  {
+    path: '/login',
+    redirect: '/admin/login',
   },
   {
     path: '/admin/login',

@@ -3,6 +3,7 @@ import { useWorkflowStore } from '../store/modules/workflow'
 
 export const useAuditJournal = () => {
   const workflow = useWorkflowStore()
+  workflow.hydrateState()
   const actorFilter = ref('all')
   const outcomeFilter = ref<'all' | 'success' | 'rejected'>('all')
 

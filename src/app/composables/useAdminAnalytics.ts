@@ -3,6 +3,7 @@ import { useWorkflowStore } from '../store/modules/workflow'
 
 export const useAdminAnalytics = () => {
   const workflow = useWorkflowStore()
+  workflow.hydrateState()
 
   const cards = computed(() => [
     {

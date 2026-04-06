@@ -2,6 +2,9 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { AdminAuditEvent, ContentLifecycleStatus, ReviewVersion } from '../../domain/workflow'
 
+const WORKFLOW_STORAGE_KEY = 'admin_workflow_versions'
+const AUDIT_STORAGE_KEY = 'admin_workflow_audit'
+
 const transitionMap: Record<ContentLifecycleStatus, ContentLifecycleStatus[]> = {
   draft: ['on_review'],
   on_review: ['approved', 'needs_revision'],
@@ -62,6 +65,32 @@ export const useWorkflowStore = defineStore('workflow', () => {
   const versions = ref<ReviewVersion[]>(seededVersions)
   const auditEvents = ref<AdminAuditEvent[]>(seededAudit)
 
+  const persistState = (): void => {
+    localStorage.setItem(WORKFLOW_STORAGE_KEY, JSON.stringify(versions.value))
+    localStorage.setItem(AUDIT_STORAGE_KEY, JSON.stringify(auditEvents.value))
+  }
+
+  const hydrateState = (): void => {
+    const rawVersions = localStorage.getItem(WORKFLOW_STORAGE_KEY)
+    const rawAudit = localStorage.getItem(AUDIT_STORAGE_KEY)
+
+    if (rawVersions) {
+      try {
+        versions.value = JSON.parse(rawVersions) as ReviewVersion[]
+      } catch {
+        versions.value = seededVersions
+      }
+    }
+
+    if (rawAudit) {
+      try {
+        auditEvents.value = JSON.parse(rawAudit) as AdminAuditEvent[]
+      } catch {
+        auditEvents.value = seededAudit
+      }
+    }
+  }
+
   const pendingReview = computed(() =>
     versions.value.filter((version) => version.status === 'on_review'),
   )
@@ -93,6 +122,7 @@ export const useWorkflowStore = defineStore('workflow', () => {
       note,
       createdAt: new Date().toISOString(),
     })
+    persistState()
   }
 
   const transitionVersion = (
@@ -118,6 +148,7 @@ export const useWorkflowStore = defineStore('workflow', () => {
     version.reviewerEmail = actorEmail
     version.reviewerComment = comment
     appendAuditEvent(actorEmail, action, version.id, 'success', comment)
+    persistState()
     return true
   }
 
@@ -142,6 +173,7 @@ export const useWorkflowStore = defineStore('workflow', () => {
     pendingReview,
     auditEvents,
     metrics,
+    hydrateState,
     approveVersion,
     requestRevision,
     publishVersion,

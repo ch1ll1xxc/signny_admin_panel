@@ -5,6 +5,7 @@ import { useWorkflowStore } from '../store/modules/workflow'
 export const useReviewWorkflow = () => {
   const auth = useAuthStore()
   const workflow = useWorkflowStore()
+  workflow.hydrateState()
   const commentDraft = ref<Record<string, string>>({})
 
   const canModerate = computed(() => {
