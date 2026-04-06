@@ -13,6 +13,7 @@ import {
 export const useDashboardSync = () => {
   const auth = useAuthStore()
   const workflow = useWorkflowStore()
+  workflow.hydrateState()
 
   const publicState = ref<PublicContourState | null>(null)
   const publicStateError = ref<string | null>(null)

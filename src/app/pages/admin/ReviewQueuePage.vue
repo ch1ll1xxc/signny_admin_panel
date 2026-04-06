@@ -8,6 +8,8 @@
         <p class="mt-1 text-sm text-gray-600">
           Curator/admin can approve, request revision, or publish approved versions.
         </p>
+        <p v-if="syncInfo" class="mt-2 text-sm text-emerald-700">{{ syncInfo }}</p>
+        <p v-if="syncError" class="mt-2 text-sm text-red-700">{{ syncError }}</p>
       </div>
 
       <div class="space-y-4">
@@ -54,10 +56,10 @@
             </button>
             <button
               class="rounded-md bg-blue-600 px-3 py-2 text-xs font-medium text-white disabled:cursor-not-allowed disabled:bg-gray-300"
-              :disabled="!canModerate || version.status !== 'approved'"
-              @click="publish(version.id)"
+              :disabled="!canModerate || version.status !== 'approved' || isSyncingPublication"
+              @click="handlePublish(version.id)"
             >
-              Publish
+              {{ isSyncingPublication ? 'Publishing...' : 'Publish' }}
             </button>
           </div>
         </article>
@@ -71,8 +73,21 @@ import type { ContentLifecycleStatus } from '../../domain/workflow'
 import AdminLayout from '../../components/layout/AdminLayout.vue'
 import { useReviewWorkflow } from '../../composables/useReviewWorkflow'
 
-const { allVersions, approve, canModerate, commentDraft, publish, requestRevision } =
-  useReviewWorkflow()
+const {
+  allVersions,
+  approve,
+  canModerate,
+  commentDraft,
+  isSyncingPublication,
+  publish,
+  requestRevision,
+  syncError,
+  syncInfo,
+} = useReviewWorkflow()
+
+const handlePublish = async (versionId: string): Promise<void> => {
+  await publish(versionId)
+}
 
 const statusClass = (status: ContentLifecycleStatus): string => {
   if (status === 'published') {
