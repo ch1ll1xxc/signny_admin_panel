@@ -488,6 +488,66 @@ export const workflowApi = {
     return clone(nextItem)
   },
 
+  async updateExhibit(exhibitId: string, data: { title?: string; summary?: string; description?: string; imageUrl?: string }, role: Role): Promise<Exhibit> {
+    await delay()
+    if (!['editor', 'admin'].includes(role)) {
+      throw new Error('Недостаточно прав для редактирования экспоната')
+    }
+    const exhibit = getExhibitById(exhibitId)
+    if (data.title !== undefined) exhibit.title = data.title
+    if (data.summary !== undefined) exhibit.summary = data.summary
+    if (data.description !== undefined) exhibit.description = data.description
+    if (data.imageUrl !== undefined) exhibit.imageUrl = data.imageUrl
+    pushAuditEvent('exhibit.updated', `Экспонат ${exhibitId} обновлён`, role)
+    return clone(exhibit)
+  },
+
+  async updateVersion(versionId: string, data: { sourceText?: string; adaptedText?: string }, role: Role): Promise<Version> {
+    await delay()
+    if (!['editor', 'admin'].includes(role)) {
+      throw new Error('Недостаточно прав для редактирования версии')
+    }
+    const version = getVersionById(versionId)
+    if (version.status !== 'draft' && version.status !== 'needs_revision') {
+      throw new Error('Редактирование доступно только для черновика или версии на доработке')
+    }
+    if (data.sourceText !== undefined) version.sourceText = data.sourceText
+    if (data.adaptedText !== undefined) version.adaptedText = data.adaptedText
+    bumpVersionTimestamp(version)
+    pushAuditEvent('version.content_updated', `Контент версии ${versionId} обновлён`, role)
+    return clone(version)
+  },
+
+  async updateFaqItem(faqId: string, data: { question?: string; answer?: string; videoUrl?: string; subtitles?: string; isPublished?: boolean }, role: Role): Promise<AdminFaqItem> {
+    await delay()
+    if (!['editor', 'curator', 'admin'].includes(role)) {
+      throw new Error('Недостаточно прав для редактирования FAQ')
+    }
+    const item = faqItems.find((f) => f.id === faqId)
+    if (!item) throw new Error('FAQ не найден')
+    if (data.question !== undefined) item.question = data.question
+    if (data.answer !== undefined) item.answer = data.answer
+    if (data.videoUrl !== undefined) item.videoUrl = data.videoUrl
+    if (data.subtitles !== undefined) item.subtitles = data.subtitles
+    if (data.isPublished !== undefined) item.isPublished = data.isPublished
+    item.updatedAt = new Date().toISOString()
+    saveState()
+    pushAuditEvent('faq.updated', `FAQ ${faqId} обновлён`, role)
+    return clone(item)
+  },
+
+  async deleteFaqItem(faqId: string, role: Role): Promise<void> {
+    await delay()
+    if (!['admin'].includes(role)) {
+      throw new Error('Только администратор может удалять FAQ')
+    }
+    const index = faqItems.findIndex((f) => f.id === faqId)
+    if (index === -1) throw new Error('FAQ не найден')
+    faqItems.splice(index, 1)
+    saveState()
+    pushAuditEvent('faq.deleted', `FAQ ${faqId} удалён`, role)
+  },
+
   async runPreflightChecks(): Promise<{ approved: number; onReview: number; draft: number }> {
     await delay(120)
     return {

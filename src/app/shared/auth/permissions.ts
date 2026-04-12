@@ -10,6 +10,10 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'halls.read',
     'halls.write',
     'audit.read',
+    'faq.read',
+    'faq.write',
+    'publish.execute',
+    'exports.read',
   ],
   editor: [
     'dashboard.read',
@@ -17,9 +21,22 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'exhibits.write',
     'media.read',
     'media.write',
+    'faq.read',
+    'faq.write',
   ],
-  curator: ['dashboard.read', 'exhibits.read', 'media.read'],
-  analyst: ['dashboard.read', 'exhibits.read', 'audit.read'],
+  curator: [
+    'dashboard.read',
+    'exhibits.read',
+    'media.read',
+    'faq.read',
+    'exports.read',
+  ],
+  analyst: [
+    'dashboard.read',
+    'exhibits.read',
+    'audit.read',
+    'exports.read',
+  ],
 }
 
 export const getPermissionsForRole = (role: UserRole): Permission[] => ROLE_PERMISSIONS[role]

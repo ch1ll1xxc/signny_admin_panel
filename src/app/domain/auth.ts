@@ -9,6 +9,10 @@ export type Permission =
   | 'halls.read'
   | 'halls.write'
   | 'audit.read'
+  | 'faq.read'
+  | 'faq.write'
+  | 'publish.execute'
+  | 'exports.read'
 
 export interface AuthUser {
   id: string

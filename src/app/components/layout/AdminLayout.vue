@@ -55,11 +55,14 @@ const auth = useAuth()
 const navItems = [
   { to: '/admin/dashboard', label: 'Дашборд', permission: 'dashboard.read' },
   { to: '/admin/exhibits', label: 'Экспонаты', permission: 'exhibits.read' },
+  { to: '/admin/faq', label: 'FAQ', permission: 'faq.read' },
   { to: '/admin/media', label: 'Медиатека', permission: 'media.read' },
   { to: '/admin/halls', label: 'Залы', permission: 'halls.read' },
   { to: '/admin/review', label: 'Модерация', permission: 'exhibits.read' },
+  { to: '/admin/publish', label: 'Публикация', permission: 'publish.execute' },
   { to: '/admin/audit', label: 'Аудит', permission: 'audit.read' },
   { to: '/admin/analytics', label: 'Аналитика', permission: 'audit.read' },
+  { to: '/admin/exports', label: 'Выгрузки', permission: 'exports.read' },
 ] as const
 
 const visibleNavItems = computed(() => navItems.filter((item) => auth.can(item.permission)))

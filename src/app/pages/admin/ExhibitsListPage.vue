@@ -51,8 +51,8 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="exhibit in filteredExhibits" :key="exhibit.id" class="border-t border-slate-100">
-              <td class="px-4 py-3 font-medium text-slate-800">{{ exhibit.name }}</td>
+            <tr v-for="exhibit in filteredExhibits" :key="exhibit.id" class="border-t border-slate-100 cursor-pointer hover:bg-slate-50 transition" @click="$router.push(`/admin/exhibits/${exhibit.id}`)">
+              <td class="px-4 py-3 font-medium text-cyan-700 hover:text-cyan-900">{{ exhibit.name }}</td>
               <td class="px-4 py-3 text-slate-600">{{ exhibit.hall }}</td>
               <td class="px-4 py-3">
                 <span class="rounded-full px-2 py-1 text-xs font-medium" :class="statusClass(exhibit.status)">

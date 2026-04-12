@@ -24,6 +24,8 @@ export interface Exhibit {
   title: string
   owner: string
   summary: string
+  description?: string
+  imageUrl?: string
   expositionId: string
   currentVersionId: string
 }
@@ -48,6 +50,8 @@ export interface Version {
   exhibitId: string
   number: number
   status: VersionStatus
+  sourceText?: string
+  adaptedText?: string
   updatedAt: string
 }
 
@@ -63,6 +67,8 @@ export interface AdminFaqItem {
   id: string
   question: string
   answer: string
+  videoUrl?: string
+  subtitles?: string
   updatedAt: string
   isPublished: boolean
 }

@@ -284,12 +284,52 @@ export const workflowApi = {
     return request<AdminFaqItem[]>('GET', '/faq')
   },
 
-  async addFaqItem(question: string, answer: string): Promise<AdminFaqItem> {
+  async addFaqItem(input: { question: string; answer: string }, role: Role): Promise<AdminFaqItem> {
     if (config.useMockApi) {
-      return mockWorkflowApi.addFaqItem({ question, answer }, 'editor')
+      return mockWorkflowApi.addFaqItem(input, role)
     }
 
-    return request<AdminFaqItem>('POST', '/faq', { question, answer })
+    return request<AdminFaqItem>('POST', '/faq', input)
+  },
+
+  async updateFaqItem(faqId: string, data: { question?: string; answer?: string; videoUrl?: string; subtitles?: string; isPublished?: boolean }, role: Role): Promise<AdminFaqItem> {
+    if (config.useMockApi) {
+      return mockWorkflowApi.updateFaqItem(faqId, data, role)
+    }
+
+    return request<AdminFaqItem>('PATCH', `/faq/${faqId}`, data)
+  },
+
+  async deleteFaqItem(faqId: string, role: Role): Promise<void> {
+    if (config.useMockApi) {
+      return mockWorkflowApi.deleteFaqItem(faqId, role)
+    }
+
+    await request<void>('POST', `/faq/${faqId}/delete`, {})
+  },
+
+  async updateExhibit(exhibitId: string, data: { title?: string; summary?: string; description?: string; imageUrl?: string }, role: Role): Promise<Exhibit> {
+    if (config.useMockApi) {
+      return mockWorkflowApi.updateExhibit(exhibitId, data, role)
+    }
+
+    return request<Exhibit>('PATCH', `/exhibits/${exhibitId}`, data)
+  },
+
+  async updateVersion(versionId: string, data: { sourceText?: string; adaptedText?: string }, role: Role): Promise<Version> {
+    if (config.useMockApi) {
+      return mockWorkflowApi.updateVersion(versionId, data, role)
+    }
+
+    return request<Version>('PATCH', `/versions/${versionId}`, data)
+  },
+
+  async runPreflightChecks(): Promise<{ approved: number; onReview: number; draft: number }> {
+    if (config.useMockApi) {
+      return mockWorkflowApi.runPreflightChecks()
+    }
+
+    return request<{ approved: number; onReview: number; draft: number }>('POST', '/publish/preflight', {})
   },
 
   async listAuditEvents(): Promise<AuditEvent[]> {

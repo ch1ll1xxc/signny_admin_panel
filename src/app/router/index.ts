@@ -2,10 +2,14 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import LoginPage from '../pages/admin/LoginPage.vue'
 import DashboardPage from '../pages/admin/DashboardPage.vue'
 import ExhibitsListPage from '../pages/admin/ExhibitsListPage.vue'
+import ExhibitDetailPage from '../pages/admin/ExhibitDetailPage.vue'
 import UnauthorizedPage from '../pages/admin/UnauthorizedPage.vue'
 import MediaLibraryPage from '../pages/admin/MediaLibraryPage.vue'
 import HallsManagementPage from '../pages/admin/HallsManagementPage.vue'
 import ReviewQueuePage from '../pages/admin/ReviewQueuePage.vue'
+import FaqPage from '../pages/admin/FaqPage.vue'
+import PublishPage from '../pages/admin/PublishPage.vue'
+import ExportsPage from '../pages/admin/ExportsPage.vue'
 import AuditPage from '../pages/admin/AuditPage.vue'
 import AnalyticsPage from '../pages/admin/AnalyticsPage.vue'
 import type { Permission } from '../domain/auth'
@@ -47,6 +51,15 @@ const routes: RouteRecordRaw[] = [
     },
   },
   {
+    path: '/admin/exhibits/:id',
+    name: 'AdminExhibitDetail',
+    component: ExhibitDetailPage,
+    meta: {
+      requiresAuth: true,
+      requiredPermission: 'exhibits.read',
+    },
+  },
+  {
     path: '/admin/forbidden',
     name: 'AdminForbidden',
     component: UnauthorizedPage,
@@ -79,6 +92,33 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiredPermission: 'exhibits.read',
+    },
+  },
+  {
+    path: '/admin/faq',
+    name: 'AdminFaq',
+    component: FaqPage,
+    meta: {
+      requiresAuth: true,
+      requiredPermission: 'faq.read',
+    },
+  },
+  {
+    path: '/admin/publish',
+    name: 'AdminPublish',
+    component: PublishPage,
+    meta: {
+      requiresAuth: true,
+      requiredPermission: 'publish.execute',
+    },
+  },
+  {
+    path: '/admin/exports',
+    name: 'AdminExports',
+    component: ExportsPage,
+    meta: {
+      requiresAuth: true,
+      requiredPermission: 'exports.read',
     },
   },
   {
