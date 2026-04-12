@@ -76,7 +76,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { workflowApi } from '@/api/mockWorkflowApi'
+import { workflowApi } from '@/api/workflowApi'
 import type { ExhibitListItem, Exposition } from '@/types/workflow'
 
 const router = useRouter()

@@ -1,62 +1,67 @@
 <template>
   <AdminLayout>
-    <template #title>Media library</template>
+    <template #title>Медиатека</template>
 
     <div class="grid gap-6 lg:grid-cols-3">
       <div class="space-y-4 lg:col-span-2">
         <input
           v-model="searchQuery"
           type="search"
-          placeholder="Search media files"
-          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+          placeholder="Поиск по медиафайлам"
+          class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100"
         />
 
-        <div class="overflow-hidden rounded-lg border border-gray-200 bg-white">
+        <div class="overflow-hidden rounded-2xl border border-white/70 bg-white/85 shadow-sm backdrop-blur">
           <table class="min-w-full text-sm">
-            <thead class="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
               <tr>
-                <th class="px-4 py-3">File</th>
-                <th class="px-4 py-3">Type</th>
-                <th class="px-4 py-3">Status</th>
-                <th class="px-4 py-3">Size</th>
+                <th class="px-4 py-3">Файл</th>
+                <th class="px-4 py-3">Тип</th>
+                <th class="px-4 py-3">Статус</th>
+                <th class="px-4 py-3">Размер</th>
               </tr>
             </thead>
             <tbody>
               <tr
                 v-for="item in filteredMedia"
                 :key="item.id"
-                class="cursor-pointer border-t border-gray-100 hover:bg-gray-50"
+                class="cursor-pointer border-t border-slate-100 transition hover:bg-cyan-50/50"
                 @click="selectMedia(item.id)"
               >
-                <td class="px-4 py-3 font-medium text-gray-800">{{ item.name }}</td>
-                <td class="px-4 py-3 text-gray-600">{{ item.type }}</td>
-                <td class="px-4 py-3 text-gray-600">{{ item.status }}</td>
-                <td class="px-4 py-3 text-gray-600">{{ item.size }}</td>
+                <td class="px-4 py-3 font-medium text-slate-800">{{ item.name }}</td>
+                <td class="px-4 py-3 text-slate-600">{{ item.type }}</td>
+                <td class="px-4 py-3 text-slate-600">{{ item.status }}</td>
+                <td class="px-4 py-3 text-slate-600">{{ item.size }}</td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
 
-      <div class="rounded-lg border border-gray-200 bg-white p-4">
-        <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500">Details</h3>
+      <div class="rounded-2xl border border-white/70 bg-white/85 p-4 shadow-sm backdrop-blur">
+        <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Детали</h3>
         <div v-if="selectedMedia" class="mt-3 space-y-2 text-sm">
-          <p><span class="font-medium text-gray-700">Name:</span> {{ selectedMedia.name }}</p>
-          <p><span class="font-medium text-gray-700">Uploaded:</span> {{ selectedMedia.uploadDate }}</p>
-          <p><span class="font-medium text-gray-700">Used in:</span></p>
-          <ul class="list-inside list-disc text-gray-600">
+          <p><span class="font-medium text-slate-700">Название:</span> {{ selectedMedia.name }}</p>
+          <p><span class="font-medium text-slate-700">Загружен:</span> {{ selectedMedia.uploadDate }}</p>
+          <p><span class="font-medium text-slate-700">Используется в:</span></p>
+          <ul class="list-inside list-disc text-slate-600">
             <li v-for="place in selectedMedia.usedIn" :key="place">{{ place }}</li>
           </ul>
         </div>
-        <p v-else class="mt-3 text-sm text-gray-500">Select a file to view details.</p>
+        <p v-else class="mt-3 text-sm text-slate-500">Выберите файл, чтобы увидеть детали.</p>
       </div>
     </div>
   </AdminLayout>
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import AdminLayout from '../../components/layout/AdminLayout.vue'
 import { useMediaLibrary } from '../../composables/useMediaLibrary'
 
-const { filteredMedia, searchQuery, selectedMedia, selectMedia } = useMediaLibrary()
+const { filteredMedia, searchQuery, selectedMedia, selectMedia, hydrateFromApi } = useMediaLibrary()
+
+onMounted(() => {
+  void hydrateFromApi()
+})
 </script>

@@ -120,7 +120,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
-import { getAllowedActions, workflowApi } from '@/api/mockWorkflowApi'
+import { getAllowedActions, workflowApi } from '@/api/workflowApi'
 import { useToast } from '@/composables/useToast'
 import { useAuthStore } from '@/stores/auth'
 import type { Exhibit, Exposition, ReviewComment, Role, Version, VersionStatus, WorkflowAction, WorkflowJob } from '@/types/workflow'

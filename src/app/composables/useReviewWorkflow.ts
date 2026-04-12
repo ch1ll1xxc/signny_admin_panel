@@ -15,21 +15,26 @@ export const useReviewWorkflow = () => {
     return role === 'admin' || role === 'curator'
   })
 
-  const approve = (versionId: string): boolean => {
+  const approve = async (versionId: string): Promise<boolean> => {
     if (!auth.user) {
       return false
     }
 
-    return workflow.approveVersion(versionId, auth.user.email, commentDraft.value[versionId])
+    return workflow.approveVersion(
+      versionId,
+      auth.user.email,
+      auth.user.role,
+      commentDraft.value[versionId],
+    )
   }
 
-  const requestRevision = (versionId: string): boolean => {
+  const requestRevision = async (versionId: string): Promise<boolean> => {
     if (!auth.user) {
       return false
     }
 
     const comment = commentDraft.value[versionId] || 'Needs revision'
-    return workflow.requestRevision(versionId, auth.user.email, comment)
+    return workflow.requestRevision(versionId, auth.user.email, auth.user.role, comment)
   }
 
   const publish = async (versionId: string): Promise<boolean> => {
@@ -37,7 +42,7 @@ export const useReviewWorkflow = () => {
       return false
     }
 
-    const published = workflow.publishVersion(versionId, auth.user.email)
+    const published = await workflow.publishVersion(versionId, auth.user.email, auth.user.role)
     if (!published) {
       return false
     }

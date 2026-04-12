@@ -1,4 +1,5 @@
 import type {
+  AdminFaqItem,
   AuditEvent,
   Exhibit,
   ExhibitListItem,
@@ -11,6 +12,18 @@ import type {
   WorkflowAction,
   WorkflowJob,
 } from '@/types/workflow'
+import { syncPublishedSnapshot } from '@/api/publicSyncApi'
+
+const WORKFLOW_STORAGE_KEY = 'signny-admin-workflow-state-v1'
+
+interface PersistedWorkflowState {
+  exhibits: Exhibit[]
+  versions: Version[]
+  reviewComments: ReviewComment[]
+  jobs: WorkflowJob[]
+  auditEvents: AuditEvent[]
+  faqItems: AdminFaqItem[]
+}
 
 interface TransitionRule {
   from: VersionStatus[]
@@ -100,8 +113,81 @@ const reviewComments: ReviewComment[] = [
   },
 ]
 
+const faqItems: AdminFaqItem[] = [
+  {
+    id: 'faq-1',
+    question: 'Как отправить экспонат на согласование?',
+    answer: 'Откройте карточку экспоната, заполните обязательные поля и отправьте версию в очередь согласования.',
+    updatedAt: new Date().toISOString(),
+    isPublished: true,
+  },
+  {
+    id: 'faq-2',
+    question: 'Можно ли запланировать публикацию на выходные?',
+    answer: 'Да, для согласованной версии используйте публикационный контур и задайте окно выкладки.',
+    updatedAt: new Date().toISOString(),
+    isPublished: true,
+  },
+]
+
 const jobs: WorkflowJob[] = []
 const auditEvents: AuditEvent[] = []
+
+const canUseStorage = (): boolean => typeof window !== 'undefined' && Boolean(window.localStorage)
+
+const saveState = () => {
+  if (!canUseStorage()) {
+    return
+  }
+
+  const payload: PersistedWorkflowState = {
+    exhibits,
+    versions,
+    reviewComments,
+    jobs,
+    auditEvents,
+    faqItems,
+  }
+
+  window.localStorage.setItem(WORKFLOW_STORAGE_KEY, JSON.stringify(payload))
+}
+
+const loadState = () => {
+  if (!canUseStorage()) {
+    return
+  }
+
+  try {
+    const raw = window.localStorage.getItem(WORKFLOW_STORAGE_KEY)
+    if (!raw) {
+      return
+    }
+
+    const parsed = JSON.parse(raw) as Partial<PersistedWorkflowState>
+    if (Array.isArray(parsed.exhibits)) {
+      exhibits.splice(0, exhibits.length, ...parsed.exhibits)
+    }
+    if (Array.isArray(parsed.versions)) {
+      versions.splice(0, versions.length, ...parsed.versions)
+    }
+    if (Array.isArray(parsed.reviewComments)) {
+      reviewComments.splice(0, reviewComments.length, ...parsed.reviewComments)
+    }
+    if (Array.isArray(parsed.jobs)) {
+      jobs.splice(0, jobs.length, ...parsed.jobs)
+    }
+    if (Array.isArray(parsed.auditEvents)) {
+      auditEvents.splice(0, auditEvents.length, ...parsed.auditEvents)
+    }
+    if (Array.isArray(parsed.faqItems)) {
+      faqItems.splice(0, faqItems.length, ...parsed.faqItems)
+    }
+  } catch {
+    // ignore malformed persisted payload and continue with defaults
+  }
+}
+
+loadState()
 
 const delay = async (ms = 180): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -156,6 +242,7 @@ const pushAuditEvent = (action: string, details: string, actorRole: Role) => {
     actorRole,
     createdAt: new Date().toISOString(),
   })
+  saveState()
 }
 
 const runJobInternal = async (versionId: string, type: JobType, requestedBy: Role): Promise<WorkflowJob> => {
@@ -168,13 +255,16 @@ const runJobInternal = async (versionId: string, type: JobType, requestedBy: Rol
     createdAt: new Date().toISOString(),
   }
   jobs.unshift(job)
+  saveState()
   pushAuditEvent('job.queued', `${type} поставлен в очередь для ${versionId}`, requestedBy)
   await delay(160)
   job.status = 'running'
+  saveState()
   pushAuditEvent('job.running', `${type} выполняется для ${versionId}`, requestedBy)
   await delay(220)
   job.status = 'completed'
   job.finishedAt = new Date().toISOString()
+  saveState()
   pushAuditEvent('job.completed', `${type} завершен для ${versionId}`, requestedBy)
   return clone(job)
 }
@@ -328,7 +418,7 @@ export const workflowApi = {
     return runJobInternal(versionId, type, role)
   },
 
-  async publishApproved(role: Role): Promise<{ publishedCount: number }> {
+  async publishApproved(role: Role): Promise<{ publishedCount: number; synced: boolean; syncMessage: string }> {
     await delay()
     if (role !== 'admin') {
       throw new Error('Только администратор может публиковать согласованные версии')
@@ -339,8 +429,63 @@ export const workflowApi = {
       await this.transitionVersion(version.id, 'publish', role)
     }
 
+    const syncResult = await syncPublishedSnapshot({
+      exhibits,
+      versions,
+      faqItems,
+    })
+
+    if (syncResult.ok) {
+      pushAuditEvent('publish.sync_public.ok', `Public contour synced (status=${syncResult.status})`, role)
+    } else {
+      pushAuditEvent('publish.sync_public.failed', `Public contour sync failed: ${syncResult.message}`, role)
+    }
+
     pushAuditEvent('publish.bulk', `Bulk publish completed, count=${approvedVersions.length}`, role)
-    return { publishedCount: approvedVersions.length }
+    return {
+      publishedCount: approvedVersions.length,
+      synced: syncResult.ok,
+      syncMessage: syncResult.message,
+    }
+  },
+
+  async listFaqItems(): Promise<AdminFaqItem[]> {
+    await delay(80)
+    return clone(faqItems)
+  },
+
+  async addFaqItem(input: { question: string; answer: string }, role: Role): Promise<AdminFaqItem> {
+    await delay(140)
+
+    if (!['editor', 'curator', 'admin'].includes(role)) {
+      throw new Error('Недостаточно прав для добавления FAQ')
+    }
+
+    const question = input.question.trim()
+    const answer = input.answer.trim()
+
+    if (!question || !answer) {
+      throw new Error('Вопрос и ответ обязательны')
+    }
+
+    const duplicate = faqItems.some((item) => item.question.toLowerCase() === question.toLowerCase())
+    if (duplicate) {
+      throw new Error('FAQ с таким вопросом уже существует')
+    }
+
+    const nextItem: AdminFaqItem = {
+      id: nextId('faq'),
+      question,
+      answer,
+      updatedAt: new Date().toISOString(),
+      isPublished: true,
+    }
+
+    faqItems.unshift(nextItem)
+    saveState()
+    pushAuditEvent('faq.created', `FAQ item created: ${nextItem.id}`, role)
+
+    return clone(nextItem)
   },
 
   async runPreflightChecks(): Promise<{ approved: number; onReview: number; draft: number }> {

@@ -54,7 +54,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { workflowApi } from '@/api/mockWorkflowApi'
+import { workflowApi } from '@/api/workflowApi'
 import { useToast } from '@/composables/useToast'
 import { useAuthStore } from '@/stores/auth'
 import type { ExhibitListItem, VersionStatus } from '@/types/workflow'

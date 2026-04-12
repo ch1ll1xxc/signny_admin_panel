@@ -44,7 +44,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { workflowApi } from '@/api/mockWorkflowApi'
+import { workflowApi } from '@/api/workflowApi'
 import { useToast } from '@/composables/useToast'
 import { useAuthStore } from '@/stores/auth'
 
@@ -66,7 +66,7 @@ const publishAllApproved = async () => {
   feedback.value = ''
   try {
     const result = await workflowApi.publishApproved(auth.role)
-    feedback.value = `Опубликовано согласованных версий: ${result.publishedCount}.`
+    feedback.value = `Опубликовано согласованных версий: ${result.publishedCount}. Синхронизация public: ${result.synced ? 'ok' : 'ошибка'} (${result.syncMessage}).`
     pushToast('success', feedback.value)
   } catch (error) {
     feedback.value = error instanceof Error ? error.message : 'Ошибка публикации'
@@ -82,8 +82,8 @@ const runPreflight = async () => {
   currentAction.value = 'preflight'
   feedback.value = ''
   try {
-    const check = await workflowApi.runPreflightChecks()
-    feedback.value = `Preflight: согласовано=${check.approved}, на согласовании=${check.onReview}, черновик=${check.draft}.`
+    const check = await workflowApi.publishPreflight()
+    feedback.value = `Preflight: готово к публикации=${check.canPublish}, проверено=${check.approvedCount} версий. ${check.message}`
     pushToast('info', 'Preflight-проверка завершена')
   } catch (error) {
     feedback.value = error instanceof Error ? error.message : 'Preflight-проверка завершилась с ошибкой'

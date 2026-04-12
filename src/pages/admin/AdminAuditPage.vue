@@ -28,7 +28,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { workflowApi } from '@/api/mockWorkflowApi'
+import { workflowApi } from '@/api/workflowApi'
 import { useToast } from '@/composables/useToast'
 import type { AuditEvent, Role } from '@/types/workflow'
 

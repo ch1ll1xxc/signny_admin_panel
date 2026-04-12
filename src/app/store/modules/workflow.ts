@@ -1,6 +1,8 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
+import { workflowApi } from '@/api/workflowApi'
 import type { AdminAuditEvent, ContentLifecycleStatus, ReviewVersion } from '../../domain/workflow'
+import type { AuditEvent, VersionStatus } from '@/types/workflow'
 
 const WORKFLOW_STORAGE_KEY = 'admin_workflow_versions'
 const AUDIT_STORAGE_KEY = 'admin_workflow_audit'
@@ -61,16 +63,86 @@ const seededAudit: AdminAuditEvent[] = [
   },
 ]
 
+function mapVersionStatusToLifecycle(status: VersionStatus): ContentLifecycleStatus {
+  if (status === 'draft') return 'draft'
+  if (status === 'on_review') return 'on_review'
+  if (status === 'approved') return 'approved'
+  if (status === 'published') return 'published'
+  if (status === 'needs_revision') return 'needs_revision'
+  return 'archived'
+}
+
+function mapAuditEvent(event: AuditEvent): AdminAuditEvent {
+  return {
+    id: event.id,
+    actorEmail: `${event.actorRole}@museum.local`,
+    action: event.action.includes('approve')
+      ? 'approve'
+      : event.action.includes('request')
+        ? 'request_revision'
+        : event.action.includes('publish')
+          ? 'publish'
+          : 'submit_review',
+    entity: event.details,
+    outcome: 'success',
+    createdAt: event.createdAt,
+    note: event.details,
+  }
+}
+
+function toRole(input: string): 'editor' | 'curator' | 'admin' {
+  if (input === 'admin' || input === 'curator' || input === 'editor') {
+    return input
+  }
+  return 'editor'
+}
+
+function actionForTransition(nextStatus: ContentLifecycleStatus): 'approve' | 'request_revision' | 'publish' {
+  if (nextStatus === 'approved') return 'approve'
+  if (nextStatus === 'needs_revision') return 'request_revision'
+  return 'publish'
+}
+
 export const useWorkflowStore = defineStore('workflow', () => {
   const versions = ref<ReviewVersion[]>(seededVersions)
   const auditEvents = ref<AdminAuditEvent[]>(seededAudit)
+  const isHydrated = ref(false)
 
   const persistState = (): void => {
     localStorage.setItem(WORKFLOW_STORAGE_KEY, JSON.stringify(versions.value))
     localStorage.setItem(AUDIT_STORAGE_KEY, JSON.stringify(auditEvents.value))
   }
 
+  const syncFromApi = async (): Promise<void> => {
+    const exhibits = await workflowApi.listExhibits()
+    const normalizedVersions = await Promise.all(
+      exhibits.map(async (item) => {
+        const exhibitVersions = await workflowApi.listVersions(item.id)
+        const latest = [...exhibitVersions].sort((a, b) => b.number - a.number)[0]
+        if (!latest) {
+          return null
+        }
+        return {
+          id: latest.id,
+          exhibitTitle: item.title,
+          status: mapVersionStatusToLifecycle(latest.status),
+          submitterEmail: `${item.owner}@museum.local`,
+          submittedAt: latest.updatedAt,
+        } as ReviewVersion
+      }),
+    )
+
+    const remoteAudit = await workflowApi.listAuditEvents()
+    versions.value = normalizedVersions.filter((item): item is ReviewVersion => Boolean(item))
+    auditEvents.value = remoteAudit.map(mapAuditEvent)
+    persistState()
+  }
+
   const hydrateState = (): void => {
+    if (isHydrated.value) {
+      return
+    }
+
     const rawVersions = localStorage.getItem(WORKFLOW_STORAGE_KEY)
     const rawAudit = localStorage.getItem(AUDIT_STORAGE_KEY)
 
@@ -89,6 +161,12 @@ export const useWorkflowStore = defineStore('workflow', () => {
         auditEvents.value = seededAudit
       }
     }
+
+    isHydrated.value = true
+
+    void syncFromApi().catch(() => {
+      // keep local fallback state when backend is unavailable
+    })
   }
 
   const pendingReview = computed(() =>
@@ -125,13 +203,14 @@ export const useWorkflowStore = defineStore('workflow', () => {
     persistState()
   }
 
-  const transitionVersion = (
+  const transitionVersion = async (
     versionId: string,
     nextStatus: ContentLifecycleStatus,
     actorEmail: string,
+    actorRole: string,
     action: AdminAuditEvent['action'],
     comment?: string,
-  ): boolean => {
+  ): Promise<boolean> => {
     const version = versions.value.find((item) => item.id === versionId)
     if (!version) {
       appendAuditEvent(actorEmail, action, versionId, 'rejected', 'Version not found')
@@ -144,28 +223,49 @@ export const useWorkflowStore = defineStore('workflow', () => {
       return false
     }
 
-    version.status = nextStatus
-    version.reviewerEmail = actorEmail
-    version.reviewerComment = comment
-    appendAuditEvent(actorEmail, action, version.id, 'success', comment)
-    persistState()
-    return true
+    try {
+      await workflowApi.transitionVersion(
+        version.id,
+        actionForTransition(nextStatus),
+        toRole(actorRole),
+        comment,
+      )
+      version.status = nextStatus
+      version.reviewerEmail = actorEmail
+      version.reviewerComment = comment
+      appendAuditEvent(actorEmail, action, version.id, 'success', comment)
+      persistState()
+      return true
+    } catch {
+      appendAuditEvent(actorEmail, action, version.id, 'rejected', 'Transition request failed')
+      return false
+    }
   }
 
-  const approveVersion = (versionId: string, actorEmail: string, comment?: string): boolean => {
-    return transitionVersion(versionId, 'approved', actorEmail, 'approve', comment)
-  }
-
-  const requestRevision = (
+  const approveVersion = async (
     versionId: string,
     actorEmail: string,
-    comment: string,
-  ): boolean => {
-    return transitionVersion(versionId, 'needs_revision', actorEmail, 'request_revision', comment)
+    actorRole: string,
+    comment?: string,
+  ): Promise<boolean> => {
+    return transitionVersion(versionId, 'approved', actorEmail, actorRole, 'approve', comment)
   }
 
-  const publishVersion = (versionId: string, actorEmail: string): boolean => {
-    return transitionVersion(versionId, 'published', actorEmail, 'publish')
+  const requestRevision = async (
+    versionId: string,
+    actorEmail: string,
+    actorRole: string,
+    comment: string,
+  ): Promise<boolean> => {
+    return transitionVersion(versionId, 'needs_revision', actorEmail, actorRole, 'request_revision', comment)
+  }
+
+  const publishVersion = async (
+    versionId: string,
+    actorEmail: string,
+    actorRole: string,
+  ): Promise<boolean> => {
+    return transitionVersion(versionId, 'published', actorEmail, actorRole, 'publish')
   }
 
   return {

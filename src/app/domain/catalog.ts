@@ -10,7 +10,7 @@ export interface ExhibitSummary {
 }
 
 export interface MediaFile {
-  id: number
+  id: string
   name: string
   type: 'video' | 'subtitles'
   status: 'ready' | 'processing'

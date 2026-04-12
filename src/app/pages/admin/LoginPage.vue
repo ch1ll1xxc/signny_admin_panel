@@ -1,106 +1,83 @@
 <template>
-  <div class="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-950 px-4 py-8">
+  <div class="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-8">
     <div class="pointer-events-none absolute inset-0">
-      <div class="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl" />
-      <div class="absolute -bottom-28 -right-12 h-80 w-80 rounded-full bg-indigo-500/20 blur-3xl" />
+      <div class="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-cyan-400/20 blur-3xl" />
+      <div class="absolute -bottom-16 -right-16 h-80 w-80 rounded-full bg-sky-500/15 blur-3xl" />
     </div>
 
-    <div class="relative z-10 grid w-full max-w-5xl overflow-hidden rounded-3xl border border-white/20 bg-white/10 shadow-2xl backdrop-blur-xl md:grid-cols-2">
-      <section class="hidden bg-gradient-to-br from-cyan-500/30 to-indigo-600/20 p-10 text-slate-100 md:block">
-        <p class="text-xs font-semibold uppercase tracking-[0.25em] text-cyan-100">Signny Admin</p>
-        <h1 class="mt-6 text-4xl font-bold leading-tight">Curation control room</h1>
-        <p class="mt-4 text-sm text-slate-200/90">
-          Manage exhibits, moderation workflow, and publication telemetry from a single admin contour.
+    <div class="relative z-10 w-full max-w-5xl overflow-hidden rounded-3xl border border-white/70 bg-white/90 shadow-2xl backdrop-blur md:grid md:grid-cols-2">
+      <section class="hidden border-r border-slate-200/70 bg-gradient-to-br from-slate-900 to-cyan-900 p-10 text-slate-100 md:block">
+        <p class="text-xs font-semibold uppercase tracking-[0.25em] text-cyan-200">Signny Admin</p>
+        <h1 class="mt-6 text-4xl font-bold leading-tight">Curation Control Deck</h1>
+        <p class="mt-4 text-sm text-cyan-100/90">
+          Unified panel for moderation workflow, publishing, and public contour sync.
         </p>
 
-        <ul class="mt-8 space-y-3 text-sm text-slate-100/90">
-          <li class="rounded-xl bg-white/10 px-4 py-3">Role-based access for admin, editor, curator, analyst</li>
-          <li class="rounded-xl bg-white/10 px-4 py-3">Workflow transitions with audit records</li>
-          <li class="rounded-xl bg-white/10 px-4 py-3">Public contour synchronization ready</li>
+        <ul class="mt-8 space-y-3 text-sm">
+          <li class="rounded-xl bg-white/10 px-4 py-3">Fast demo login with role presets</li>
+          <li class="rounded-xl bg-white/10 px-4 py-3">Server-backed lifecycle and audit flow</li>
+          <li class="rounded-xl bg-white/10 px-4 py-3">Responsive dashboard for desktop and laptop</li>
         </ul>
       </section>
 
-      <section class="bg-white p-6 sm:p-8 md:p-10">
-        <h2 class="text-2xl font-bold text-slate-900">Welcome back</h2>
-        <p class="mt-1 text-sm text-slate-500">Sign in to continue to the admin dashboard.</p>
+      <section class="p-6 sm:p-8 md:p-10">
+        <h2 class="text-2xl font-bold text-slate-900">Sign in</h2>
+        <p class="mt-1 text-sm text-slate-600">Демо-режим: пароль не обязателен.</p>
 
-        <form class="mt-7 space-y-5" @submit.prevent="handleLogin">
-          <div>
-            <label for="email" class="text-sm font-medium text-slate-700">Email</label>
-            <input
-              id="email"
-              v-model="email"
-              type="email"
-              required
-              class="mt-2 w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
-              placeholder="admin@museum.local"
-            />
-          </div>
+        <div class="mt-5 flex flex-wrap gap-2">
+          <button
+            type="button"
+            class="rounded-xl bg-cyan-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-cyan-700"
+            @click="quickLogin('admin@museum.local', 'admin')"
+          >
+            Войти как админ
+          </button>
+          <button
+            type="button"
+            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-cyan-400 hover:bg-cyan-50"
+            @click="quickLogin('editor@museum.local', 'editor')"
+          >
+            Войти как редактор
+          </button>
+          <button
+            type="button"
+            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-cyan-400 hover:bg-cyan-50"
+            @click="quickLogin('curator@museum.local', 'curator')"
+          >
+            Войти как куратор
+          </button>
+        </div>
 
-          <div>
-            <label for="password" class="text-sm font-medium text-slate-700">Password</label>
-            <input
-              id="password"
-              v-model="password"
-              type="password"
-              required
-              class="mt-2 w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
-              placeholder="Any password for demo"
-            />
-          </div>
+        <el-form label-position="top" class="mt-6" @submit.prevent="handleLogin">
+          <el-form-item label="Email">
+            <el-input v-model="email" type="email" placeholder="admin@museum.local" />
+          </el-form-item>
 
-          <div>
-            <label for="role" class="text-sm font-medium text-slate-700">Role</label>
-            <select
-              id="role"
-              v-model="role"
-              class="mt-2 w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
-            >
-              <option value="admin">Admin</option>
-              <option value="editor">Editor</option>
-              <option value="curator">Curator</option>
-              <option value="analyst">Analyst</option>
-            </select>
-          </div>
+          <el-form-item label="Пароль">
+            <el-input v-model="password" type="password" show-password placeholder="Необязательно в демо" />
+          </el-form-item>
 
-          <div class="rounded-xl bg-slate-50 p-3">
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Quick role presets</p>
-            <div class="mt-2 flex flex-wrap gap-2">
-              <button
-                v-for="preset in presets"
-                :key="preset.email"
-                type="button"
-                class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-cyan-500 hover:text-cyan-700"
-                @click="applyPreset(preset.email, preset.role)"
-              >
-                {{ preset.role }}
-              </button>
-            </div>
-          </div>
+          <el-form-item label="Роль">
+            <el-select v-model="role" class="w-full">
+              <el-option value="admin" label="Админ" />
+              <el-option value="editor" label="Редактор" />
+              <el-option value="curator" label="Куратор" />
+              <el-option value="analyst" label="Аналитик" />
+            </el-select>
+          </el-form-item>
 
           <div v-if="errorMessage" class="rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700">
             {{ errorMessage }}
           </div>
 
-          <button
-            type="submit"
-            :disabled="auth.isLoading"
-            class="w-full rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
-          >
-            <span v-if="!auth.isLoading">Sign in</span>
-            <span v-else>Signing in...</span>
-          </button>
-        </form>
+          <el-button type="primary" :loading="auth.isLoading" class="w-full" native-type="submit">
+            Открыть админку
+          </el-button>
+        </el-form>
 
         <div class="mt-4 flex items-center justify-between gap-3 text-xs text-slate-500">
-          <span>Cannot get in? Open <code>/admin/login</code> or <code>/login</code>.</span>
-          <button
-            type="button"
-            class="font-semibold text-cyan-700 hover:text-cyan-800"
-            @click="resetLocalSession"
-          >
-            Reset session
-          </button>
+          <span>Прямой вход: <code>/admin/login</code></span>
+          <el-button text type="primary" @click="resetLocalSession">Сбросить сессию</el-button>
         </div>
       </section>
     </div>
@@ -108,7 +85,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import type { UserRole } from '../../domain/auth'
 import { useAuth } from '../../composables/useAuth'
@@ -135,14 +112,27 @@ const applyPreset = (nextEmail: string, nextRole: UserRole): void => {
   password.value = 'demo'
 }
 
+const resolveRedirect = (): string => {
+  const redirect = route.query.redirect as string | undefined
+  if (redirect && redirect.startsWith('/admin/')) {
+    return redirect
+  }
+  return '/admin/dashboard'
+}
+
+const quickLogin = async (nextEmail: string, nextRole: UserRole): Promise<void> => {
+  applyPreset(nextEmail, nextRole)
+  await handleLogin()
+}
+
 const resetLocalSession = (): void => {
   auth.logout()
   errorMessage.value = 'Session cleared. Sign in again.'
 }
 
 const handleLogin = async () => {
-  if (!email.value || !password.value) {
-    errorMessage.value = 'Fill email and password to continue.'
+  if (!email.value) {
+    errorMessage.value = 'Fill email to continue.'
     return
   }
 
@@ -150,10 +140,16 @@ const handleLogin = async () => {
 
   try {
     await auth.login(email.value, role.value)
-    const redirect = route.query.redirect as string
-    router.push(redirect || '/admin/dashboard')
-  } catch {
-    errorMessage.value = 'Login failed. Try again.'
+    await router.replace(resolveRedirect())
+  } catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : 'Login failed. Try again.'
   }
 }
+
+onMounted(() => {
+  auth.hydrate()
+  if (auth.isAuthenticated.value) {
+    void router.replace('/admin/dashboard')
+  }
+})
 </script>

@@ -36,11 +36,12 @@
     </article>
 
     <article class="rounded-lg border border-slate-200 bg-white p-4">
+      <p v-if="isLoading" class="mb-3 text-sm text-slate-500">Загружаем FAQ...</p>
       <ul class="space-y-3 text-sm">
-        <li v-for="item in faq" :key="item.question" class="rounded-md border border-slate-100 p-3">
+        <li v-for="item in faq" :key="item.id" class="rounded-md border border-slate-100 p-3">
           <p class="font-medium">{{ item.question }}</p>
           <p class="mt-1 text-slate-600">{{ item.answer }}</p>
-          <p class="mt-2 text-xs text-slate-500">Обновлено: {{ item.updated }}</p>
+          <p class="mt-2 text-xs text-slate-500">Обновлено: {{ formatUpdated(item.updatedAt) }}</p>
         </li>
       </ul>
     </article>
@@ -48,39 +49,33 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
+import { workflowApi } from '@/api/workflowApi'
 import { useToast } from '@/composables/useToast'
-
-type FaqItem = {
-  question: string
-  answer: string
-  updated: string
-}
+import { useAuthStore } from '@/stores/auth'
+import type { AdminFaqItem } from '@/types/workflow'
 
 const showComposer = ref(false)
 const draftQuestion = ref('')
 const draftAnswer = ref('')
 const errorMessage = ref('')
 const isSaving = ref(false)
+const isLoading = ref(false)
+const auth = useAuthStore()
 const { pushToast } = useToast()
 
-const faq = ref<FaqItem[]>([
-  {
-    question: 'Как отправить экспонат на согласование?',
-    answer: 'Откройте карточку экспоната, заполните обязательные поля и отправьте версию в очередь согласования.',
-    updated: 'сегодня',
-  },
-  {
-    question: 'Можно ли запланировать публикацию на выходные?',
-    answer: 'Да, для согласованной версии используйте публикационный контур и задайте окно выкладки.',
-    updated: '2 дня назад',
-  },
-  {
-    question: 'Что фиксируется в журнале аудита?',
-    answer: 'Каждый переход статуса, правка контента и действие публикации автоматически логируются.',
-    updated: 'неделю назад',
-  },
-])
+const faq = ref<AdminFaqItem[]>([])
+
+const formatUpdated = (isoDate: string) => new Date(isoDate).toLocaleString()
+
+const loadFaq = async () => {
+  isLoading.value = true
+  try {
+    faq.value = await workflowApi.listFaqItems()
+  } finally {
+    isLoading.value = false
+  }
+}
 
 const toggleComposer = () => {
   showComposer.value = !showComposer.value
@@ -102,23 +97,21 @@ const saveFaq = async () => {
     return
   }
   isSaving.value = true
-  const previous = [...faq.value]
-  faq.value.unshift({ question, answer, updated: 'just now' })
   try {
-    await new Promise((resolve) => setTimeout(resolve, 250))
-    const duplicated = previous.some((item) => item.question.toLowerCase() === question.toLowerCase())
-    if (duplicated) {
-      throw new Error('FAQ с таким вопросом уже существует.')
-    }
+    await workflowApi.addFaqItem(question, answer)
+    await loadFaq()
     resetDraft()
     showComposer.value = false
     pushToast('success', 'FAQ-запись добавлена')
   } catch (error) {
-    faq.value = previous
     errorMessage.value = error instanceof Error ? error.message : 'Не удалось сохранить FAQ-запись'
     pushToast('error', errorMessage.value)
   } finally {
     isSaving.value = false
   }
 }
+
+onMounted(async () => {
+  await loadFaq()
+})
 </script>

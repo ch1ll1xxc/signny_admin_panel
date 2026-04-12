@@ -59,6 +59,14 @@ export interface ReviewComment {
   createdAt: string
 }
 
+export interface AdminFaqItem {
+  id: string
+  question: string
+  answer: string
+  updatedAt: string
+  isPublished: boolean
+}
+
 export interface WorkflowJob {
   id: string
   versionId: string
@@ -74,5 +82,20 @@ export interface AuditEvent {
   action: string
   details: string
   actorRole: Role
+  createdAt: string
+}
+
+export interface MediaAsset {
+  id: string
+  fileName: string
+  url: string
+  mimeType: string
+  createdAt: string
+}
+
+export interface QrCodeEntry {
+  id: string
+  exhibitId: string
+  href: string
   createdAt: string
 }

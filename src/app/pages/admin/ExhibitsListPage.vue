@@ -1,19 +1,19 @@
 <template>
   <AdminLayout>
-    <template #title>Exhibits</template>
+    <template #title>Экспонаты</template>
 
     <div class="space-y-6">
       <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 class="text-2xl font-semibold text-gray-900">Exhibit catalog</h2>
-          <p class="text-sm text-gray-500">Migration S3 mock dataset and filters.</p>
+          <h2 class="text-2xl font-semibold text-slate-900">Каталог экспонатов</h2>
+          <p class="text-sm text-slate-600">Фильтрация и просмотр текущих карточек.</p>
         </div>
 
         <button
-          class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-gray-300"
+          class="rounded-xl bg-cyan-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-cyan-700 disabled:cursor-not-allowed disabled:bg-slate-300"
           :disabled="!canWrite"
         >
-          Create exhibit
+          Создать экспонат
         </button>
       </div>
 
@@ -21,49 +21,49 @@
         <input
           v-model="searchQuery"
           type="search"
-          placeholder="Search exhibits"
-          class="rounded-md border border-gray-300 px-3 py-2 text-sm"
+          placeholder="Поиск по экспонатам"
+          class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100"
         />
 
-        <select v-model="hallFilter" class="rounded-md border border-gray-300 px-3 py-2 text-sm">
-          <option value="all">All halls</option>
+        <select v-model="hallFilter" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100">
+          <option value="all">Все залы</option>
           <option v-for="hall in halls" :key="hall" :value="hall">{{ hall }}</option>
         </select>
 
-        <select v-model="statusFilter" class="rounded-md border border-gray-300 px-3 py-2 text-sm">
-          <option value="all">All statuses</option>
-          <option value="Published">Published</option>
-          <option value="OnReview">On review</option>
-          <option value="Draft">Draft</option>
+        <select v-model="statusFilter" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100">
+          <option value="all">Все статусы</option>
+          <option value="Published">Опубликовано</option>
+          <option value="OnReview">На согласовании</option>
+          <option value="Draft">Черновик</option>
         </select>
       </div>
 
-      <div class="overflow-hidden rounded-lg border border-gray-200 bg-white">
+      <div class="overflow-hidden rounded-2xl border border-white/70 bg-white/85 shadow-sm backdrop-blur">
         <table class="min-w-full text-sm">
-          <thead class="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
             <tr>
-              <th class="px-4 py-3">Name</th>
-              <th class="px-4 py-3">Hall</th>
-              <th class="px-4 py-3">Status</th>
-              <th class="px-4 py-3">Video</th>
-              <th class="px-4 py-3">Subtitles</th>
-              <th class="px-4 py-3">Updated</th>
+              <th class="px-4 py-3">Название</th>
+              <th class="px-4 py-3">Зал</th>
+              <th class="px-4 py-3">Статус</th>
+              <th class="px-4 py-3">Видео</th>
+              <th class="px-4 py-3">Субтитры</th>
+              <th class="px-4 py-3">Обновлено</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="exhibit in filteredExhibits" :key="exhibit.id" class="border-t border-gray-100">
-              <td class="px-4 py-3 font-medium text-gray-800">{{ exhibit.name }}</td>
-              <td class="px-4 py-3 text-gray-600">{{ exhibit.hall }}</td>
+            <tr v-for="exhibit in filteredExhibits" :key="exhibit.id" class="border-t border-slate-100">
+              <td class="px-4 py-3 font-medium text-slate-800">{{ exhibit.name }}</td>
+              <td class="px-4 py-3 text-slate-600">{{ exhibit.hall }}</td>
               <td class="px-4 py-3">
                 <span class="rounded-full px-2 py-1 text-xs font-medium" :class="statusClass(exhibit.status)">
                   {{ exhibit.status }}
                 </span>
               </td>
-              <td class="px-4 py-3 text-gray-600">{{ exhibit.hasVideo ? 'Yes' : 'No' }}</td>
-              <td class="px-4 py-3 text-gray-600">
-                {{ exhibit.hasSubtitles ? exhibit.subtitlesType || 'Yes' : 'No' }}
+              <td class="px-4 py-3 text-slate-600">{{ exhibit.hasVideo ? 'Да' : 'Нет' }}</td>
+              <td class="px-4 py-3 text-slate-600">
+                {{ exhibit.hasSubtitles ? exhibit.subtitlesType || 'Да' : 'Нет' }}
               </td>
-              <td class="px-4 py-3 text-gray-600">{{ exhibit.updated }}</td>
+              <td class="px-4 py-3 text-slate-600">{{ exhibit.updated }}</td>
             </tr>
           </tbody>
         </table>

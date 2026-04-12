@@ -31,7 +31,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { workflowApi } from '@/api/mockWorkflowApi'
+import { workflowApi } from '@/api/workflowApi'
 import type { ExhibitListItem } from '@/types/workflow'
 
 const exhibits = ref<ExhibitListItem[]>([])

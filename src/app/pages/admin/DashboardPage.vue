@@ -1,94 +1,135 @@
 <template>
   <AdminLayout>
-    <template #title>Dashboard</template>
+    <template #title>Дашборд</template>
 
     <div class="space-y-6">
-      <div class="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h2 class="text-3xl font-bold text-gray-900">Welcome to Signny Admin</h2>
-          <p class="text-sm text-gray-500">Track moderation flow, publication state, and public contour sync.</p>
-        </div>
-        <p class="text-sm text-gray-600">Active role: <strong>{{ auth.user?.role || 'unknown' }}</strong></p>
-      </div>
+      <section class="bento-card p-6">
+        <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Административный контур</p>
+            <h2 class="mt-2 text-3xl font-bold text-slate-900">Контроль публикаций и модерации</h2>
+            <p class="mt-2 max-w-2xl text-sm text-slate-600">
+              Отслеживайте жизненный цикл контента, прогресс согласования и синхронизацию с публичным контуром.
+            </p>
+          </div>
 
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
-        <article class="rounded-lg border border-gray-200 bg-white p-4">
-          <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Tracked versions</p>
-          <p class="mt-2 text-3xl font-bold text-gray-900">{{ metrics.total }}</p>
-        </article>
-        <article class="rounded-lg border border-gray-200 bg-white p-4">
-          <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">On review</p>
-          <p class="mt-2 text-3xl font-bold text-amber-700">{{ metrics.onReview }}</p>
-        </article>
-        <article class="rounded-lg border border-gray-200 bg-white p-4">
-          <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Needs revision</p>
-          <p class="mt-2 text-3xl font-bold text-red-700">{{ metrics.needsRevision }}</p>
-        </article>
-        <article class="rounded-lg border border-gray-200 bg-white p-4">
-          <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Published</p>
-          <p class="mt-2 text-3xl font-bold text-green-700">{{ metrics.published }}</p>
-        </article>
-      </div>
-
-      <section class="rounded-lg border border-gray-200 bg-white p-6">
-        <h3 class="text-lg font-semibold text-gray-900">Quick actions</h3>
-        <div class="mt-4 flex flex-wrap gap-3">
-          <router-link
-            to="/admin/exhibits"
-            class="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-          >
-            View exhibits
-          </router-link>
-          <router-link
-            v-if="auth.can('exhibits.read')"
-            to="/admin/review"
-            class="inline-flex items-center rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
-            Open review queue
-          </router-link>
-          <router-link
-            v-if="auth.can('audit.read')"
-            to="/admin/audit"
-            class="inline-flex items-center rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
-            Audit journal
-          </router-link>
+          <div class="rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm text-cyan-900">
+            <p class="font-semibold">Текущая роль: {{ auth.user?.role || 'unknown' }}</p>
+            <p class="mt-1 text-xs text-cyan-700">Пользователь: {{ auth.user?.email || 'гость' }}</p>
+          </div>
         </div>
       </section>
 
-      <section class="rounded-lg border border-gray-200 bg-white p-6">
-        <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h3 class="text-lg font-semibold text-gray-900">Public contour sync</h3>
-            <p class="text-sm text-gray-500">Push currently published versions into public contour integration endpoint.</p>
+      <section class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <article
+          v-for="card in metricCards"
+          :key="card.key"
+          class="bento-card relative overflow-hidden p-5"
+        >
+          <div class="absolute -right-4 -top-4 h-20 w-20 rounded-full opacity-20" :class="card.bgClass" />
+          <div class="relative flex items-start justify-between gap-3">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ card.label }}</p>
+              <p class="mt-2 text-4xl font-bold text-slate-900">{{ card.value }}</p>
+            </div>
+            <el-icon :size="22" :class="card.iconClass">
+              <component :is="card.icon" />
+            </el-icon>
           </div>
-          <button
-            class="inline-flex items-center rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-            :disabled="isSyncing || !canSync"
+        </article>
+      </section>
+
+      <section class="grid grid-cols-1 gap-4 xl:grid-cols-3">
+        <article class="bento-card p-5 xl:col-span-2">
+          <div class="flex items-center justify-between gap-3">
+            <h3 class="text-lg font-semibold text-slate-900">Быстрые действия</h3>
+            <el-icon class="text-cyan-600" :size="20"><Lightning /></el-icon>
+          </div>
+
+          <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+            <router-link
+              to="/admin/exhibits"
+              class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-cyan-300 hover:bg-cyan-50"
+            >
+              К экспонатам
+            </router-link>
+            <router-link
+              to="/admin/review"
+              class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-cyan-300 hover:bg-cyan-50"
+            >
+              Очередь модерации
+            </router-link>
+            <router-link
+              to="/admin/audit"
+              class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-cyan-300 hover:bg-cyan-50"
+            >
+              Журнал аудита
+            </router-link>
+          </div>
+
+          <div class="mt-5">
+            <h4 class="text-sm font-semibold text-slate-700">Состояние пайплайна</h4>
+            <div class="mt-3 space-y-3">
+              <div v-for="lane in progressLanes" :key="lane.label">
+                <div class="mb-1 flex items-center justify-between text-xs text-slate-500">
+                  <span>{{ lane.label }}</span>
+                  <span>{{ lane.value }}</span>
+                </div>
+                <el-progress :percentage="lane.percentage" :stroke-width="10" :show-text="false" :color="lane.color" />
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="bento-card p-5">
+          <div class="flex items-center justify-between gap-3">
+            <h3 class="text-lg font-semibold text-slate-900">Синхронизация</h3>
+            <el-icon class="text-emerald-600" :size="20"><Connection /></el-icon>
+          </div>
+
+          <p class="mt-2 text-sm text-slate-600">
+            Передача опубликованных версий в публичный контур и проверка состояния snapshot.
+          </p>
+
+          <el-button
+            class="mt-4 w-full"
+            type="primary"
+            :loading="isSyncing"
+            :disabled="!canSync"
             @click="syncPublicContour"
           >
-            {{ isSyncing ? 'Syncing...' : 'Sync publication now' }}
-          </button>
-        </div>
+            {{ isSyncing ? 'Синхронизация...' : 'Синхронизировать публикации' }}
+          </el-button>
 
-        <p v-if="syncMessage" class="mt-3 text-sm text-gray-600">{{ syncMessage }}</p>
+          <p v-if="syncMessage" class="mt-3 text-sm text-emerald-700">{{ syncMessage }}</p>
+          <p v-if="publicStateError" class="mt-2 text-sm text-red-700">{{ publicStateError }}</p>
 
-        <div class="mt-4 rounded-md bg-slate-50 p-4 text-sm">
-          <p v-if="publicStateError" class="text-red-700">{{ publicStateError }}</p>
-          <div v-else-if="publicState" class="grid gap-2 sm:grid-cols-2">
-            <p>Public exhibits: <strong>{{ publicState.exhibits.publishedCount }}</strong></p>
-            <p>Public FAQ items: <strong>{{ publicState.faq.publishedCount }}</strong></p>
-            <p>Content versions: <strong>{{ publicState.contentVersions.totalCount }}</strong></p>
-            <p>Generated at: <strong>{{ publicState.generatedAt }}</strong></p>
+          <div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm">
+            <template v-if="publicState">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-500">Публичных экспонатов</span>
+                <strong class="text-slate-800">{{ publicState.exhibits.publishedCount }}</strong>
+              </div>
+              <div class="mt-2 flex items-center justify-between">
+                <span class="text-slate-500">Публичных FAQ</span>
+                <strong class="text-slate-800">{{ publicState.faq.publishedCount }}</strong>
+              </div>
+              <div class="mt-2 flex items-center justify-between">
+                <span class="text-slate-500">Версий контента</span>
+                <strong class="text-slate-800">{{ publicState.contentVersions.totalCount }}</strong>
+              </div>
+            </template>
+            <p v-else class="text-slate-500">Загрузка состояния...</p>
           </div>
-          <p v-else class="text-gray-500">Loading public contour state...</p>
-        </div>
+        </article>
       </section>
     </div>
   </AdminLayout>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { Check, Connection, DataAnalysis, Lightning, WarningFilled } from '@element-plus/icons-vue'
 import AdminLayout from '../../components/layout/AdminLayout.vue'
 import { useAuth } from '../../composables/useAuth'
 import { useDashboardSync } from '../../composables/useDashboardSync'
@@ -102,4 +143,63 @@ const metrics = workflow.metrics
 
 const { canSync, isSyncing, publicState, publicStateError, syncMessage, syncPublicContour } =
   useDashboardSync()
+
+const metricCards = computed(() => [
+  {
+    key: 'total',
+    label: 'Версий в работе',
+    value: metrics.total,
+    icon: DataAnalysis,
+    iconClass: 'text-cyan-600',
+    bgClass: 'bg-cyan-400',
+  },
+  {
+    key: 'review',
+    label: 'На согласовании',
+    value: metrics.onReview,
+    icon: WarningFilled,
+    iconClass: 'text-amber-600',
+    bgClass: 'bg-amber-400',
+  },
+  {
+    key: 'revision',
+    label: 'Нужна доработка',
+    value: metrics.needsRevision,
+    icon: WarningFilled,
+    iconClass: 'text-rose-600',
+    bgClass: 'bg-rose-400',
+  },
+  {
+    key: 'published',
+    label: 'Опубликовано',
+    value: metrics.published,
+    icon: Check,
+    iconClass: 'text-emerald-600',
+    bgClass: 'bg-emerald-400',
+  },
+])
+
+const progressLanes = computed(() => {
+  const total = Math.max(metrics.total, 1)
+  return [
+    {
+      label: 'Согласование',
+      value: metrics.onReview,
+      percentage: Math.round((metrics.onReview / total) * 100),
+      color: '#f59e0b',
+    },
+    {
+      label: 'Доработка',
+      value: metrics.needsRevision,
+      percentage: Math.round((metrics.needsRevision / total) * 100),
+      color: '#f43f5e',
+    },
+    {
+      label: 'Публикация',
+      value: metrics.published,
+      percentage: Math.round((metrics.published / total) * 100),
+      color: '#10b981',
+    },
+  ]
+})
 </script>
