@@ -28,9 +28,9 @@
           </div>
 
           <div class="flex items-center gap-2">
-            <el-tag effect="plain" type="info">{{ auth.user?.role || 'guest' }}</el-tag>
+            <el-tag effect="plain" type="info">{{ user?.role || 'guest' }}</el-tag>
             <el-text type="info">
-              <slot name="user-info">{{ auth.user?.email || 'Пользователь' }}</slot>
+              <slot name="user-info">{{ user?.email || 'Пользователь' }}</slot>
             </el-text>
           </div>
         </div>
@@ -51,6 +51,7 @@ import { useAuth } from '../../composables/useAuth'
 const router = useRouter()
 const route = useRoute()
 const auth = useAuth()
+const { user } = auth
 
 const navItems = [
   { to: '/admin/dashboard', label: 'Дашборд', permission: 'dashboard.read' },
