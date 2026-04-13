@@ -28,6 +28,7 @@
           <button
             type="button"
             class="rounded-xl bg-violet-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-violet-700"
+            data-testid="login-admin"
             @click="quickLogin('admin@museum.local', 'admin')"
           >
             Войти как админ
@@ -35,6 +36,7 @@
           <button
             type="button"
             class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-violet-400 hover:bg-violet-50"
+            data-testid="login-editor"
             @click="quickLogin('editor@museum.local', 'editor')"
           >
             Войти как редактор
@@ -42,6 +44,7 @@
           <button
             type="button"
             class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-violet-400 hover:bg-violet-50"
+            data-testid="login-curator"
             @click="quickLogin('curator@museum.local', 'curator')"
           >
             Войти как куратор
