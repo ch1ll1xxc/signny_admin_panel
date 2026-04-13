@@ -1,80 +1,73 @@
 <template>
   <el-container class="min-h-screen">
+    <!-- Desktop sidebar -->
     <el-aside width="260px" class="hidden border-r border-slate-200 bg-white lg:block">
-      <div class="border-b border-slate-200 px-5 py-5">
-        <p class="text-[10px] font-bold uppercase tracking-[0.25em] text-violet-600">Signny</p>
-        <h1 class="mt-1 text-lg font-semibold text-slate-900">Админ-панель</h1>
-      </div>
-
-      <nav class="mt-2 flex flex-col gap-0.5 px-3">
-        <router-link
-          v-for="item in visibleNavItems"
-          :key="item.to"
-          :to="item.to"
-          class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition"
-          :class="route.path === item.to
-            ? 'bg-violet-50 text-violet-700'
-            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'"
-        >
-          <span class="h-1.5 w-1.5 rounded-full" :class="route.path === item.to ? 'bg-violet-500' : 'bg-slate-300'" />
-          {{ item.label }}
-        </router-link>
-      </nav>
-
-      <div class="mt-auto border-t border-slate-100 px-4 py-4">
-        <div class="mb-3 flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
-          <span class="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white" :class="roleAvatarClass">
-            {{ roleInitial }}
-          </span>
-          <div class="min-w-0 flex-1">
-            <p class="truncate text-sm font-medium text-slate-800">{{ user?.email || 'Гость' }}</p>
-            <p class="text-xs" :class="roleLabelClass">{{ roleLabel }}</p>
-          </div>
-        </div>
-        <button
-          class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-red-50 hover:border-red-200 hover:text-red-600"
-          @click="handleLogout"
-        >
-          Выйти
-        </button>
-      </div>
+      <SidebarContent
+        :nav-items="visibleNavItems"
+        :email="user?.email || 'Гость'"
+        :label="roleLabel"
+        :initial="roleInitial"
+        :avatar-class="roleAvatarClass"
+        :label-class="roleLabelClass"
+        @logout="handleLogout"
+      />
     </el-aside>
 
+    <!-- Mobile drawer -->
+    <el-drawer v-model="drawerOpen" direction="ltr" :size="280" :show-close="false" class="!p-0">
+      <SidebarContent
+        :nav-items="visibleNavItems"
+        :email="user?.email || 'Гость'"
+        :label="roleLabel"
+        :initial="roleInitial"
+        :avatar-class="roleAvatarClass"
+        :label-class="roleLabelClass"
+        @navigate="drawerOpen = false"
+        @logout="handleLogout"
+      />
+    </el-drawer>
+
     <el-container>
-      <el-header class="!h-auto border-b border-slate-200 bg-white px-5 py-4 md:px-8">
-        <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p class="text-xs uppercase tracking-[0.18em] text-slate-400">Административный контур</p>
-            <h2 class="text-2xl font-semibold text-slate-900">
+      <header class="flex items-center gap-3 border-b border-slate-200 bg-white px-4 py-3 md:px-8 md:py-4">
+        <button class="lg:hidden rounded-lg p-2 text-slate-600 hover:bg-slate-100 transition" @click="drawerOpen = true">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+
+        <div class="flex flex-1 items-center justify-between gap-3">
+          <div class="min-w-0">
+            <p class="hidden text-[10px] uppercase tracking-[0.18em] text-slate-400 md:block">Административный контур</p>
+            <h2 class="truncate text-lg font-semibold text-slate-900 md:text-2xl">
               <slot name="title">Страница</slot>
             </h2>
           </div>
 
-          <div class="flex items-center gap-2">
+          <div class="flex shrink-0 items-center gap-2">
             <span class="rounded-full px-2.5 py-1 text-xs font-semibold" :class="roleBadgeClass">
               {{ roleLabel }}
             </span>
-            <span class="text-sm text-slate-500">{{ user?.email || 'Пользователь' }}</span>
+            <span class="hidden text-sm text-slate-500 md:inline">{{ user?.email || '' }}</span>
           </div>
         </div>
-      </el-header>
+      </header>
 
-      <el-main class="bg-slate-50 px-5 pb-8 pt-8 md:px-8 md:pt-10">
+      <main class="bg-slate-50 px-4 pb-8 pt-6 md:px-8 md:pt-8">
         <slot />
-      </el-main>
+      </main>
     </el-container>
   </el-container>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuth } from '../../composables/useAuth'
+import SidebarContent from './SidebarContent.vue'
 
 const router = useRouter()
-const route = useRoute()
 const auth = useAuth()
 const { user } = auth
+
+const drawerOpen = ref(false)
 
 const navItems = [
   { to: '/admin/dashboard', label: 'Дашборд', permission: 'dashboard.read' },
@@ -120,6 +113,7 @@ const roleLabelClass = computed(() => {
 
 const handleLogout = () => {
   auth.logout()
+  drawerOpen.value = false
   router.push('/admin/login')
 }
 </script>
