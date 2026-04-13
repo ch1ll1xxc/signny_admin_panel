@@ -14,7 +14,7 @@ import type {
 } from '@/types/workflow'
 import { syncPublishedSnapshot } from '@/api/publicSyncApi'
 
-const WORKFLOW_STORAGE_KEY = 'signny-admin-workflow-state-v2'
+const WORKFLOW_STORAGE_KEY = 'signny-admin-workflow-state-v3'
 
 interface PersistedWorkflowState {
   exhibits: Exhibit[]
@@ -119,17 +119,32 @@ const reviewComments: ReviewComment[] = [
 const faqItems: AdminFaqItem[] = [
   {
     id: 'faq-1',
-    question: 'Как отправить экспонат на согласование?',
-    answer: 'Откройте карточку экспоната, заполните обязательные поля и отправьте версию в очередь согласования.',
+    exhibitId: 'x-101',
+    exhibitTitle: 'Рождение стекла',
+    question: 'Из чего делали первое стекло?',
+    answer: 'Первое стекло делали из песка, соды и извести. Позже научились добавлять оксиды металлов для цвета.',
+    videoUrl: '/videos/glass-origin.mp4',
+    subtitles: 'Стекло появилось в Египте. Песок плавили при высокой температуре.',
     updatedAt: new Date().toISOString(),
     isPublished: true,
   },
   {
     id: 'faq-2',
-    question: 'Можно ли запланировать публикацию на выходные?',
-    answer: 'Да, для согласованной версии используйте публикационный контур и задайте окно выкладки.',
+    exhibitId: 'x-102',
+    exhibitTitle: 'Лесные саундскейпы',
+    question: 'Какие звуки записаны в экспозиции?',
+    answer: 'Записаны звуки птиц, шум ветра в кронах, журчание ручья и хруст веток.',
     updatedAt: new Date().toISOString(),
     isPublished: true,
+  },
+  {
+    id: 'faq-3',
+    exhibitId: 'x-103',
+    exhibitTitle: 'Слои окаменелостей',
+    question: 'Как определить возраст окаменелости?',
+    answer: 'Возраст определяют по глубине залегания слоя и методом радиоуглеродного датирования.',
+    updatedAt: new Date().toISOString(),
+    isPublished: false,
   },
 ]
 
@@ -457,7 +472,7 @@ export const workflowApi = {
     return clone(faqItems)
   },
 
-  async addFaqItem(input: { question: string; answer: string }, role: Role): Promise<AdminFaqItem> {
+  async addFaqItem(input: { exhibitId: string; question: string; answer: string; videoUrl?: string; subtitles?: string }, role: Role): Promise<AdminFaqItem> {
     await delay(140)
 
     if (!['editor', 'curator', 'admin'].includes(role)) {
@@ -467,26 +482,31 @@ export const workflowApi = {
     const question = input.question.trim()
     const answer = input.answer.trim()
 
+    if (!input.exhibitId) {
+      throw new Error('Необходимо выбрать экспонат')
+    }
+
     if (!question || !answer) {
       throw new Error('Вопрос и ответ обязательны')
     }
 
-    const duplicate = faqItems.some((item) => item.question.toLowerCase() === question.toLowerCase())
-    if (duplicate) {
-      throw new Error('FAQ с таким вопросом уже существует')
-    }
+    const exhibit = getExhibitById(input.exhibitId)
 
     const nextItem: AdminFaqItem = {
       id: nextId('faq'),
+      exhibitId: input.exhibitId,
+      exhibitTitle: exhibit.title,
       question,
       answer,
+      videoUrl: input.videoUrl?.trim() || undefined,
+      subtitles: input.subtitles?.trim() || undefined,
       updatedAt: new Date().toISOString(),
-      isPublished: true,
+      isPublished: false,
     }
 
     faqItems.unshift(nextItem)
     saveState()
-    pushAuditEvent('faq.created', `FAQ item created: ${nextItem.id}`, role)
+    pushAuditEvent('faq.created', `FAQ создан: ${nextItem.id} для ${exhibit.title}`, role)
 
     return clone(nextItem)
   },

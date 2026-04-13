@@ -65,6 +65,8 @@ export interface ReviewComment {
 
 export interface AdminFaqItem {
   id: string
+  exhibitId: string
+  exhibitTitle?: string
   question: string
   answer: string
   videoUrl?: string

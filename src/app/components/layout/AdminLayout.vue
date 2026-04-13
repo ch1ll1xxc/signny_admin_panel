@@ -29,7 +29,7 @@
 
     <el-container>
       <el-header class="!h-auto border-b border-slate-200 bg-white">
-        <div class="flex items-center gap-3 px-4 py-3 md:px-8">
+        <div class="flex items-center gap-3 px-4 py-5 md:px-8">
           <button class="lg:hidden rounded-lg p-2 text-slate-600 hover:bg-slate-100 transition" @click="drawerOpen = true">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
           </button>

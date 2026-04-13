@@ -284,7 +284,7 @@ export const workflowApi = {
     return request<AdminFaqItem[]>('GET', '/faq')
   },
 
-  async addFaqItem(input: { question: string; answer: string }, role: Role): Promise<AdminFaqItem> {
+  async addFaqItem(input: { exhibitId: string; question: string; answer: string; videoUrl?: string; subtitles?: string }, role: Role): Promise<AdminFaqItem> {
     if (config.useMockApi) {
       return mockWorkflowApi.addFaqItem(input, role)
     }
