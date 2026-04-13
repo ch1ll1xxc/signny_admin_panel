@@ -28,18 +28,15 @@
     </el-drawer>
 
     <el-container>
-      <header class="flex items-center gap-3 border-b border-slate-200 bg-white px-4 py-3 md:px-8 md:py-4">
-        <button class="lg:hidden rounded-lg p-2 text-slate-600 hover:bg-slate-100 transition" @click="drawerOpen = true">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        </button>
+      <el-header class="!h-auto border-b border-slate-200 bg-white">
+        <div class="flex items-center gap-3 px-4 py-3 md:px-8">
+          <button class="lg:hidden rounded-lg p-2 text-slate-600 hover:bg-slate-100 transition" @click="drawerOpen = true">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </button>
 
-        <div class="flex flex-1 items-center justify-between gap-3">
-          <div class="min-w-0">
-            <p class="hidden text-[10px] uppercase tracking-[0.18em] text-slate-400 md:block">Административный контур</p>
-            <h2 class="truncate text-lg font-semibold text-slate-900 md:text-2xl">
-              <slot name="title">Страница</slot>
-            </h2>
-          </div>
+          <h2 class="min-w-0 flex-1 truncate text-lg font-semibold text-slate-900">
+            <slot name="title">Страница</slot>
+          </h2>
 
           <div class="flex shrink-0 items-center gap-2">
             <span class="rounded-full px-2.5 py-1 text-xs font-semibold" :class="roleBadgeClass">
@@ -48,11 +45,11 @@
             <span class="hidden text-sm text-slate-500 md:inline">{{ user?.email || '' }}</span>
           </div>
         </div>
-      </header>
+      </el-header>
 
-      <main class="bg-slate-50 px-4 pb-8 pt-6 md:px-8 md:pt-8">
+      <el-main class="bg-slate-50 px-4 pb-8 pt-6 md:px-8 md:pt-8">
         <slot />
-      </main>
+      </el-main>
     </el-container>
   </el-container>
 </template>

@@ -32,7 +32,7 @@
         </div>
       </div>
       <button
-        class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-red-50 hover:border-red-200 hover:text-red-600"
+        class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
         @click="$emit('logout')"
       >
         Выйти
