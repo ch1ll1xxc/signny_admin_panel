@@ -187,6 +187,37 @@
         <p v-if="!versionJobs.length" class="text-sm text-slate-500">Задач пока нет.</p>
       </div>
 
+      <!-- QR-код -->
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
+        <h2 class="text-lg font-semibold text-slate-900">QR-код</h2>
+        <div class="flex flex-wrap gap-2">
+          <button
+            class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
+            @click="generateQr"
+          >
+            Сгенерировать QR
+          </button>
+          <button
+            v-if="qrGenerated"
+            class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
+            @click="downloadQr"
+          >
+            Скачать PNG
+          </button>
+          <button
+            v-if="qrGenerated"
+            class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
+            @click="printQr"
+          >
+            Печать
+          </button>
+        </div>
+        <div class="flex flex-col items-center gap-2">
+          <canvas ref="qrCanvas" :class="{ hidden: !qrGenerated }" />
+          <p v-if="qrGenerated" class="text-xs text-slate-500">{{ qrUrl }}</p>
+        </div>
+      </div>
+
       <!-- Версии -->
       <div class="rounded-2xl border border-slate-200 bg-white p-5 space-y-3">
         <h2 class="text-lg font-semibold text-slate-900">История версий</h2>
@@ -203,8 +234,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import QRCode from 'qrcode'
 import AdminLayout from '../../components/layout/AdminLayout.vue'
 import { useAuth } from '../../composables/useAuth'
 import { useNotify } from '../../composables/useNotify'
@@ -388,9 +420,46 @@ const runPreprocess = async () => {
   try {
     await workflowApi.runJob(currentVersion.value.id, 'preprocess', userRole.value)
     versionJobs.value = await workflowApi.listJobs(currentVersion.value.id)
+    // Обновляем версии чтобы показать сгенерированный адаптированный текст
+    versions.value = await workflowApi.listVersions(exhibitId.value)
+    notify.success('Предобработка завершена')
   } finally {
     isJobRunning.value = false
   }
+}
+
+// --- QR-код ---
+const qrCanvas = ref<HTMLCanvasElement | null>(null)
+const qrGenerated = ref(false)
+const qrUrl = computed(() => `${window.location.origin}/exh/${exhibitId.value}`)
+
+const generateQr = async () => {
+  await nextTick()
+  const canvas = qrCanvas.value
+  if (!canvas) return
+  try {
+    await QRCode.toCanvas(canvas, qrUrl.value, { width: 200, margin: 2 })
+    qrGenerated.value = true
+  } catch (e) {
+    notify.error('Ошибка генерации QR')
+  }
+}
+
+const downloadQr = () => {
+  const canvas = qrCanvas.value
+  if (!canvas) return
+  const link = document.createElement('a')
+  link.download = `qr-${exhibitId.value}.png`
+  link.href = canvas.toDataURL('image/png')
+  link.click()
+}
+
+const printQr = () => {
+  const canvas = qrCanvas.value
+  if (!canvas) return
+  const win = window.open('', '_blank')
+  if (!win) return
+  win.document.write(`<img src="${canvas.toDataURL('image/png')}" onload="window.print();window.close()" />`)
 }
 
 watch(() => [auth.user.value?.role, exhibitId.value], () => { void refresh() })

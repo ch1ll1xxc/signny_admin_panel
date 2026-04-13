@@ -263,6 +263,26 @@ const pushAuditEvent = (action: string, details: string, actorRole: Role) => {
   saveState()
 }
 
+const simplifyTextForRsl = (sourceText: string): string => {
+  if (!sourceText?.trim()) return ''
+  const sentences = sourceText
+    .split(/[.!?]+/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+  const simplified = sentences.map((sentence) => {
+    return sentence
+      .replace(/\b(который|которая|которое|которые|которого|которой|которым|которых)\b/gi, '')
+      .replace(/\b(является|являются|являлся|являлась)\b/gi, '—')
+      .replace(/\b(в связи с тем что|вследствие того что|по причине того что)\b/gi, 'потому что')
+      .replace(/\b(осуществлять|осуществляет|осуществляли)\b/gi, 'делать')
+      .replace(/\b(представляет собой|представляют собой)\b/gi, '— это')
+      .replace(/\b(приблизительно|ориентировочно)\b/gi, 'около')
+      .replace(/\s{2,}/g, ' ')
+      .trim()
+  })
+  return simplified.join('. ') + '.'
+}
+
 const runJobInternal = async (versionId: string, type: JobType, requestedBy: Role): Promise<WorkflowJob> => {
   const job: WorkflowJob = {
     id: nextId('job'),
@@ -280,6 +300,16 @@ const runJobInternal = async (versionId: string, type: JobType, requestedBy: Rol
   saveState()
   pushAuditEvent('job.running', `${type} выполняется для ${versionId}`, requestedBy)
   await delay(220)
+
+  if (type === 'preprocess') {
+    const version = versions.find((v) => v.id === versionId)
+    if (version?.sourceText) {
+      version.adaptedText = simplifyTextForRsl(version.sourceText)
+      bumpVersionTimestamp(version)
+      pushAuditEvent('preprocess.adapted', `Адаптированный текст сформирован для ${versionId}`, requestedBy)
+    }
+  }
+
   job.status = 'completed'
   job.finishedAt = new Date().toISOString()
   saveState()

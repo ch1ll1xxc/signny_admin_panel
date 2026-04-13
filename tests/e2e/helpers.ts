@@ -1,13 +1,17 @@
 import type { Page } from '@playwright/test'
 
 export async function loginAs(page: Page, role: 'admin' | 'editor' | 'curator') {
-  await page.goto('/admin/login')
+  // Переходим на login и ждём полной загрузки
+  await page.goto('/admin/login', { waitUntil: 'networkidle' })
+
+  // Чистим storage (страница уже загружена, localStorage доступен)
   await page.evaluate(() => {
-    localStorage.clear()
-    sessionStorage.clear()
+    try { localStorage.clear() } catch {}
+    try { sessionStorage.clear() } catch {}
   })
-  await page.goto('/admin/login')
-  await page.waitForLoadState('networkidle')
+
+  // Перезагружаем login после очистки
+  await page.goto('/admin/login', { waitUntil: 'networkidle' })
 
   await page.locator(`[data-testid="login-${role}"]`).click()
   await page.waitForURL('**/admin/dashboard', { timeout: 5000 })
