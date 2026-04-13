@@ -26,10 +26,9 @@ export const useDashboardSync = () => {
     try {
       publicState.value = await getPublicContourState()
       publicStateError.value = null
-    } catch (error) {
+    } catch {
       publicState.value = null
-      publicStateError.value =
-        error instanceof Error ? error.message : 'Failed to load public contour state'
+      publicStateError.value = null
     }
   }
 

@@ -14,8 +14,8 @@
           </div>
 
           <div class="rounded-2xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm text-violet-900">
-            <p class="font-semibold">Текущая роль: {{ auth.user?.role || 'unknown' }}</p>
-            <p class="mt-1 text-xs text-violet-700">Пользователь: {{ auth.user?.email || 'гость' }}</p>
+            <p class="font-semibold">Текущая роль: {{ roleLabel }}</p>
+            <p class="mt-1 text-xs text-violet-700">{{ user?.email || '' }}</p>
           </div>
         </div>
       </section>
@@ -102,24 +102,20 @@
           </el-button>
 
           <p v-if="syncMessage" class="mt-3 text-sm text-emerald-700">{{ syncMessage }}</p>
-          <p v-if="publicStateError" class="mt-2 text-sm text-red-700">{{ publicStateError }}</p>
 
           <div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm">
-            <template v-if="publicState">
-              <div class="flex items-center justify-between">
-                <span class="text-slate-500">Публичных экспонатов</span>
-                <strong class="text-slate-800">{{ publicState.exhibits.publishedCount }}</strong>
-              </div>
-              <div class="mt-2 flex items-center justify-between">
-                <span class="text-slate-500">Публичных FAQ</span>
-                <strong class="text-slate-800">{{ publicState.faq.publishedCount }}</strong>
-              </div>
-              <div class="mt-2 flex items-center justify-between">
-                <span class="text-slate-500">Версий контента</span>
-                <strong class="text-slate-800">{{ publicState.contentVersions.totalCount }}</strong>
-              </div>
-            </template>
-            <p v-else class="text-slate-500">Загрузка состояния...</p>
+            <div class="flex items-center justify-between">
+              <span class="text-slate-500">Всего версий</span>
+              <strong class="text-slate-800">{{ metrics.total }}</strong>
+            </div>
+            <div class="mt-2 flex items-center justify-between">
+              <span class="text-slate-500">Опубликовано</span>
+              <strong class="text-slate-800">{{ metrics.published }}</strong>
+            </div>
+            <div class="mt-2 flex items-center justify-between">
+              <span class="text-slate-500">На согласовании</span>
+              <strong class="text-slate-800">{{ metrics.onReview }}</strong>
+            </div>
           </div>
         </article>
       </section>
@@ -136,12 +132,18 @@ import { useDashboardSync } from '../../composables/useDashboardSync'
 import { useWorkflowStore } from '../../store/modules/workflow'
 
 const auth = useAuth()
+const { user } = auth
 const workflow = useWorkflowStore()
 workflow.hydrateState()
 
 const metrics = workflow.metrics
 
-const { canSync, isSyncing, publicState, publicStateError, syncMessage, syncPublicContour } =
+const roleLabel = computed(() => {
+  const map: Record<string, string> = { admin: 'Администратор', editor: 'Редактор', curator: 'Куратор', analyst: 'Аналитик' }
+  return map[user.value?.role ?? ''] ?? 'Гость'
+})
+
+const { canSync, isSyncing, syncMessage, syncPublicContour } =
   useDashboardSync()
 
 const metricCards = computed(() => [

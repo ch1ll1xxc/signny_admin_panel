@@ -66,9 +66,11 @@
 import { ref } from 'vue'
 import AdminLayout from '../../components/layout/AdminLayout.vue'
 import { useAuth } from '../../composables/useAuth'
+import { useNotify } from '../../composables/useNotify'
 import { workflowApi } from '@/api/workflowApi'
 
 const auth = useAuth()
+const notify = useNotify()
 
 const isChecking = ref(false)
 const isPublishing = ref(false)
@@ -79,6 +81,9 @@ const runPreflight = async () => {
   isChecking.value = true
   try {
     preflightResult.value = await workflowApi.runPreflightChecks()
+    notify.info(`Готово к публикации: ${preflightResult.value.approved}`)
+  } catch (e) {
+    notify.error(e instanceof Error ? e.message : 'Ошибка проверки')
   } finally {
     isChecking.value = false
   }
@@ -91,6 +96,9 @@ const handlePublish = async () => {
     const role = auth.user.value?.role as 'admin' ?? 'admin'
     publishResult.value = await workflowApi.publishApproved(role)
     preflightResult.value = null
+    notify.success(`Опубликовано: ${publishResult.value.publishedCount} версий`)
+  } catch (e) {
+    notify.error(e instanceof Error ? e.message : 'Ошибка публикации')
   } finally {
     isPublishing.value = false
   }

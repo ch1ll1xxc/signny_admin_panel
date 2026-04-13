@@ -207,6 +207,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import AdminLayout from '../../components/layout/AdminLayout.vue'
 import { useAuth } from '../../composables/useAuth'
+import { useNotify } from '../../composables/useNotify'
 import { getAllowedActions, workflowApi } from '@/api/workflowApi'
 import type { Exhibit, ReviewComment, Role, Version, VersionStatus, WorkflowAction, WorkflowJob } from '@/types/workflow'
 
@@ -237,6 +238,7 @@ const isEditingContent = ref(false)
 const editSourceText = ref('')
 const editAdaptedText = ref('')
 
+const notify = useNotify()
 const canWrite = computed(() => auth.can('exhibits.write'))
 const exhibitId = computed(() => String(route.params.id ?? ''))
 const userRole = computed(() => (auth.user.value?.role ?? 'editor') as Role)
@@ -318,7 +320,10 @@ const saveExhibit = async () => {
       imageUrl: editImageUrl.value || undefined,
     }, userRole.value)
     isEditingExhibit.value = false
+    notify.success('Карточка сохранена')
     await refresh()
+  } catch (e) {
+    notify.error(e instanceof Error ? e.message : 'Ошибка сохранения')
   } finally {
     isSaving.value = false
   }
@@ -340,7 +345,10 @@ const saveContent = async () => {
       adaptedText: editAdaptedText.value,
     }, userRole.value)
     isEditingContent.value = false
+    notify.success('Контент сохранён')
     await refresh()
+  } catch (e) {
+    notify.error(e instanceof Error ? e.message : 'Ошибка сохранения контента')
   } finally {
     isSaving.value = false
   }
@@ -353,6 +361,7 @@ const applyAction = async (action: WorkflowAction) => {
   try {
     await workflowApi.transitionVersion(currentVersion.value.id, action, userRole.value, reviewComment.value || undefined)
     if (action === 'request_revision') reviewComment.value = ''
+    notify.success(`Выполнено: ${actionLabels[action]}`)
     await refresh()
   } catch (err) {
     errorMessage.value = err instanceof Error ? err.message : 'Не удалось выполнить переход'

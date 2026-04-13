@@ -160,10 +160,12 @@
 import { computed, onMounted, ref } from 'vue'
 import AdminLayout from '../../components/layout/AdminLayout.vue'
 import { useAuth } from '../../composables/useAuth'
+import { useNotify } from '../../composables/useNotify'
 import { workflowApi } from '@/api/workflowApi'
 import type { AdminFaqItem } from '@/types/workflow'
 
 const auth = useAuth()
+const notify = useNotify()
 const canWrite = computed(() => auth.can('faq.write'))
 
 const faqItems = ref<AdminFaqItem[]>([])
@@ -203,7 +205,10 @@ const handleAdd = async () => {
     newVideoUrl.value = ''
     newSubtitles.value = ''
     showAddForm.value = false
+    notify.success('FAQ добавлен')
     await refresh()
+  } catch (e) {
+    notify.error(e instanceof Error ? e.message : 'Ошибка при добавлении')
   } finally {
     isSubmitting.value = false
   }
@@ -235,7 +240,10 @@ const handleUpdate = async (id: string) => {
       auth.user.value?.role as 'editor' | 'curator' | 'admin' ?? 'editor',
     )
     editingId.value = null
+    notify.success('FAQ обновлён')
     await refresh()
+  } catch (e) {
+    notify.error(e instanceof Error ? e.message : 'Ошибка при обновлении')
   } finally {
     isSubmitting.value = false
   }
@@ -247,6 +255,7 @@ const handleTogglePublish = async (item: AdminFaqItem) => {
     { isPublished: !item.isPublished },
     auth.user.value?.role as 'editor' | 'curator' | 'admin' ?? 'editor',
   )
+  notify.success(item.isPublished ? 'FAQ скрыт' : 'FAQ опубликован')
   await refresh()
 }
 
@@ -255,6 +264,7 @@ const handleDelete = async (id: string) => {
     id,
     auth.user.value?.role as 'admin' ?? 'admin',
   )
+  notify.success('FAQ удалён')
   await refresh()
 }
 
