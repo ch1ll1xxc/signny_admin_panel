@@ -10,7 +10,7 @@
         </div>
 
         <button
-          class="rounded-xl bg-cyan-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-cyan-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+          class="rounded-xl bg-violet-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:bg-slate-300"
           :disabled="!canWrite"
         >
           Создать экспонат
@@ -22,15 +22,15 @@
           v-model="searchQuery"
           type="search"
           placeholder="Поиск по экспонатам"
-          class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100"
+          class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
         />
 
-        <select v-model="hallFilter" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100">
+        <select v-model="hallFilter" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-violet-400 focus:ring-2 focus:ring-violet-100">
           <option value="all">Все залы</option>
           <option v-for="hall in halls" :key="hall" :value="hall">{{ hall }}</option>
         </select>
 
-        <select v-model="statusFilter" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100">
+        <select v-model="statusFilter" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-violet-400 focus:ring-2 focus:ring-violet-100">
           <option value="all">Все статусы</option>
           <option value="Published">Опубликовано</option>
           <option value="OnReview">На согласовании</option>
@@ -52,7 +52,7 @@
           </thead>
           <tbody>
             <tr v-for="exhibit in filteredExhibits" :key="exhibit.id" class="border-t border-slate-100 cursor-pointer hover:bg-slate-50 transition" @click="$router.push(`/admin/exhibits/${exhibit.id}`)">
-              <td class="px-4 py-3 font-medium text-cyan-700 hover:text-cyan-900">{{ exhibit.name }}</td>
+              <td class="px-4 py-3 font-medium text-violet-700 hover:text-violet-900">{{ exhibit.name }}</td>
               <td class="px-4 py-3 text-slate-600">{{ exhibit.hall }}</td>
               <td class="px-4 py-3">
                 <span class="rounded-full px-2 py-1 text-xs font-medium" :class="statusClass(exhibit.status)">

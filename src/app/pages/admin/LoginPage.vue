@@ -1,15 +1,15 @@
 <template>
   <div class="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-8">
     <div class="pointer-events-none absolute inset-0">
-      <div class="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-cyan-400/20 blur-3xl" />
+      <div class="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-violet-400/20 blur-3xl" />
       <div class="absolute -bottom-16 -right-16 h-80 w-80 rounded-full bg-sky-500/15 blur-3xl" />
     </div>
 
     <div class="relative z-10 w-full max-w-5xl overflow-hidden rounded-3xl border border-white/70 bg-white/90 shadow-2xl backdrop-blur md:grid md:grid-cols-2">
-      <section class="hidden border-r border-slate-200/70 bg-gradient-to-br from-slate-900 to-cyan-900 p-10 text-slate-100 md:block">
-        <p class="text-xs font-semibold uppercase tracking-[0.25em] text-cyan-200">Signny Admin</p>
+      <section class="hidden border-r border-slate-200/70 bg-gradient-to-br from-slate-900 to-violet-900 p-10 text-slate-100 md:block">
+        <p class="text-xs font-semibold uppercase tracking-[0.25em] text-violet-200">Signny Admin</p>
         <h1 class="mt-6 text-4xl font-bold leading-tight">Curation Control Deck</h1>
-        <p class="mt-4 text-sm text-cyan-100/90">
+        <p class="mt-4 text-sm text-violet-100/90">
           Unified panel for moderation workflow, publishing, and public contour sync.
         </p>
 
@@ -27,21 +27,21 @@
         <div class="mt-5 flex flex-wrap gap-2">
           <button
             type="button"
-            class="rounded-xl bg-cyan-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-cyan-700"
+            class="rounded-xl bg-violet-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-violet-700"
             @click="quickLogin('admin@museum.local', 'admin')"
           >
             Войти как админ
           </button>
           <button
             type="button"
-            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-cyan-400 hover:bg-cyan-50"
+            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-violet-400 hover:bg-violet-50"
             @click="quickLogin('editor@museum.local', 'editor')"
           >
             Войти как редактор
           </button>
           <button
             type="button"
-            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-cyan-400 hover:bg-cyan-50"
+            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-violet-400 hover:bg-violet-50"
             @click="quickLogin('curator@museum.local', 'curator')"
           >
             Войти как куратор
@@ -70,7 +70,7 @@
             {{ errorMessage }}
           </div>
 
-          <el-button type="primary" :loading="auth.isLoading" class="w-full" native-type="submit">
+          <el-button type="primary" :loading="isLoading" class="w-full" native-type="submit">
             Открыть админку
           </el-button>
         </el-form>
@@ -93,6 +93,7 @@ import { useAuth } from '../../composables/useAuth'
 const router = useRouter()
 const route = useRoute()
 const auth = useAuth()
+const { isLoading } = auth
 
 const email = ref('admin@museum.local')
 const password = ref('demo')

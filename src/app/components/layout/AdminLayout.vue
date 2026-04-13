@@ -2,7 +2,7 @@
   <el-container class="min-h-screen">
     <el-aside width="260px" class="hidden border-r border-slate-200 bg-white lg:block">
       <div class="border-b border-slate-200 px-5 py-5">
-        <p class="text-[10px] font-bold uppercase tracking-[0.25em] text-cyan-600">Signny</p>
+        <p class="text-[10px] font-bold uppercase tracking-[0.25em] text-violet-600">Signny</p>
         <h1 class="mt-1 text-lg font-semibold text-slate-900">Админ-панель</h1>
       </div>
 
@@ -13,10 +13,10 @@
           :to="item.to"
           class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition"
           :class="route.path === item.to
-            ? 'bg-cyan-50 text-cyan-700'
+            ? 'bg-violet-50 text-violet-700'
             : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'"
         >
-          <span class="h-1.5 w-1.5 rounded-full" :class="route.path === item.to ? 'bg-cyan-500' : 'bg-slate-300'" />
+          <span class="h-1.5 w-1.5 rounded-full" :class="route.path === item.to ? 'bg-violet-500' : 'bg-slate-300'" />
           {{ item.label }}
         </router-link>
       </nav>
@@ -99,13 +99,13 @@ const roleLabel = computed(() => {
 const roleInitial = computed(() => roleLabel.value.charAt(0))
 
 const roleAvatarClass = computed(() => {
-  const map: Record<string, string> = { admin: 'bg-cyan-600', editor: 'bg-emerald-600', curator: 'bg-amber-600', analyst: 'bg-violet-600' }
+  const map: Record<string, string> = { admin: 'bg-violet-600', editor: 'bg-emerald-600', curator: 'bg-amber-600', analyst: 'bg-violet-600' }
   return map[user.value?.role ?? ''] ?? 'bg-slate-400'
 })
 
 const roleBadgeClass = computed(() => {
   const map: Record<string, string> = {
-    admin: 'bg-cyan-100 text-cyan-800',
+    admin: 'bg-violet-100 text-violet-800',
     editor: 'bg-emerald-100 text-emerald-800',
     curator: 'bg-amber-100 text-amber-800',
     analyst: 'bg-violet-100 text-violet-800',
@@ -114,7 +114,7 @@ const roleBadgeClass = computed(() => {
 })
 
 const roleLabelClass = computed(() => {
-  const map: Record<string, string> = { admin: 'text-cyan-600', editor: 'text-emerald-600', curator: 'text-amber-600', analyst: 'text-violet-600' }
+  const map: Record<string, string> = { admin: 'text-violet-600', editor: 'text-emerald-600', curator: 'text-amber-600', analyst: 'text-violet-600' }
   return map[user.value?.role ?? ''] ?? 'text-slate-400'
 })
 

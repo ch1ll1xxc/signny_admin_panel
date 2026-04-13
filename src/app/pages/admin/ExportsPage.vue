@@ -13,7 +13,7 @@
           <h3 class="font-semibold text-slate-900">Статусы версий</h3>
           <p class="text-sm text-slate-600">Текущий статус всех версий экспонатов.</p>
           <button
-            class="rounded-xl bg-cyan-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-cyan-700 disabled:bg-slate-300"
+            class="rounded-xl bg-violet-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-violet-700 disabled:bg-slate-300"
             :disabled="exporting === 'versions'"
             @click="exportVersions"
           >
@@ -25,7 +25,7 @@
           <h3 class="font-semibold text-slate-900">Журнал аудита</h3>
           <p class="text-sm text-slate-600">Все действия пользователей в системе.</p>
           <button
-            class="rounded-xl bg-cyan-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-cyan-700 disabled:bg-slate-300"
+            class="rounded-xl bg-violet-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-violet-700 disabled:bg-slate-300"
             :disabled="exporting === 'audit'"
             @click="exportAudit"
           >
@@ -37,7 +37,7 @@
           <h3 class="font-semibold text-slate-900">FAQ</h3>
           <p class="text-sm text-slate-600">Все вопросы и ответы с метаданными.</p>
           <button
-            class="rounded-xl bg-cyan-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-cyan-700 disabled:bg-slate-300"
+            class="rounded-xl bg-violet-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-violet-700 disabled:bg-slate-300"
             :disabled="exporting === 'faq'"
             @click="exportFaq"
           >

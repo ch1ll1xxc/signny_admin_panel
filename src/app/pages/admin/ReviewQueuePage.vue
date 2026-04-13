@@ -33,7 +33,7 @@
 
           <textarea
             v-model="commentDraft[version.id]"
-            class="mt-3 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100"
+            class="mt-3 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
             rows="2"
             placeholder="Комментарий модератора"
             :disabled="!canModerate"
@@ -55,7 +55,7 @@
               На доработку
             </button>
             <button
-              class="rounded-xl bg-cyan-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-cyan-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+              class="rounded-xl bg-violet-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:bg-slate-300"
               :disabled="!canModerate || version.status !== 'approved' || isSyncingPublication"
               @click="handlePublish(version.id)"
             >

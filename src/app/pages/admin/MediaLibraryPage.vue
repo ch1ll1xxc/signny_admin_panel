@@ -8,7 +8,7 @@
           v-model="searchQuery"
           type="search"
           placeholder="Поиск по медиафайлам"
-          class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100"
+          class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
         />
 
         <div class="overflow-hidden rounded-2xl border border-white/70 bg-white/85 shadow-sm backdrop-blur">
@@ -25,7 +25,7 @@
               <tr
                 v-for="item in filteredMedia"
                 :key="item.id"
-                class="cursor-pointer border-t border-slate-100 transition hover:bg-cyan-50/50"
+                class="cursor-pointer border-t border-slate-100 transition hover:bg-violet-50/50"
                 @click="selectMedia(item.id)"
               >
                 <td class="px-4 py-3 font-medium text-slate-800">{{ item.name }}</td>

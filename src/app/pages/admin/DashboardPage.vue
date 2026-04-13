@@ -13,9 +13,9 @@
             </p>
           </div>
 
-          <div class="rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm text-cyan-900">
+          <div class="rounded-2xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm text-violet-900">
             <p class="font-semibold">Текущая роль: {{ auth.user?.role || 'unknown' }}</p>
-            <p class="mt-1 text-xs text-cyan-700">Пользователь: {{ auth.user?.email || 'гость' }}</p>
+            <p class="mt-1 text-xs text-violet-700">Пользователь: {{ auth.user?.email || 'гость' }}</p>
           </div>
         </div>
       </section>
@@ -43,25 +43,25 @@
         <article class="bento-card p-5 xl:col-span-2">
           <div class="flex items-center justify-between gap-3">
             <h3 class="text-lg font-semibold text-slate-900">Быстрые действия</h3>
-            <el-icon class="text-cyan-600" :size="20"><Lightning /></el-icon>
+            <el-icon class="text-violet-600" :size="20"><Lightning /></el-icon>
           </div>
 
           <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
             <router-link
               to="/admin/exhibits"
-              class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-cyan-300 hover:bg-cyan-50"
+              class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-violet-300 hover:bg-violet-50"
             >
               К экспонатам
             </router-link>
             <router-link
               to="/admin/review"
-              class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-cyan-300 hover:bg-cyan-50"
+              class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-violet-300 hover:bg-violet-50"
             >
               Очередь модерации
             </router-link>
             <router-link
               to="/admin/audit"
-              class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-cyan-300 hover:bg-cyan-50"
+              class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-violet-300 hover:bg-violet-50"
             >
               Журнал аудита
             </router-link>
@@ -150,8 +150,8 @@ const metricCards = computed(() => [
     label: 'Версий в работе',
     value: metrics.total,
     icon: DataAnalysis,
-    iconClass: 'text-cyan-600',
-    bgClass: 'bg-cyan-400',
+    iconClass: 'text-violet-600',
+    bgClass: 'bg-violet-400',
   },
   {
     key: 'review',

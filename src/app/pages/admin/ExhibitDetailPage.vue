@@ -6,7 +6,7 @@
     <div v-else-if="loadError" class="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{{ loadError }}</div>
 
     <div v-else class="space-y-6">
-      <router-link to="/admin/exhibits" class="inline-flex items-center gap-1 text-sm text-cyan-700 hover:text-cyan-900">
+      <router-link to="/admin/exhibits" class="inline-flex items-center gap-1 text-sm text-violet-700 hover:text-violet-900">
         ← Назад к списку
       </router-link>
 
@@ -27,22 +27,22 @@
           <div class="space-y-3">
             <div>
               <label class="block text-xs font-medium text-slate-500 mb-1">Название</label>
-              <input v-model="editTitle" type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100" />
+              <input v-model="editTitle" type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100" />
             </div>
             <div>
               <label class="block text-xs font-medium text-slate-500 mb-1">Краткое описание</label>
-              <input v-model="editSummary" type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100" />
+              <input v-model="editSummary" type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100" />
             </div>
             <div>
               <label class="block text-xs font-medium text-slate-500 mb-1">Полное описание</label>
-              <textarea v-model="editDescription" rows="4" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100" />
+              <textarea v-model="editDescription" rows="4" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100" />
             </div>
             <div>
               <label class="block text-xs font-medium text-slate-500 mb-1">URL изображения</label>
-              <input v-model="editImageUrl" type="text" placeholder="https://..." class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100" />
+              <input v-model="editImageUrl" type="text" placeholder="https://..." class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100" />
             </div>
             <div class="flex gap-2">
-              <button class="rounded-lg bg-cyan-600 px-3 py-1.5 text-sm text-white hover:bg-cyan-700 disabled:bg-slate-300" :disabled="isSaving" @click="saveExhibit">
+              <button class="rounded-lg bg-violet-600 px-3 py-1.5 text-sm text-white hover:bg-violet-700 disabled:bg-slate-300" :disabled="isSaving" @click="saveExhibit">
                 {{ isSaving ? 'Сохраняем...' : 'Сохранить' }}
               </button>
               <button class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50" @click="isEditingExhibit = false">Отмена</button>
@@ -88,14 +88,14 @@
           <div class="space-y-3">
             <div>
               <label class="block text-xs font-medium text-slate-500 mb-1">Исходный текст (русский)</label>
-              <textarea v-model="editSourceText" rows="6" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-mono outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100" placeholder="Введите исходный текст описания экспоната..." />
+              <textarea v-model="editSourceText" rows="6" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-mono outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100" placeholder="Введите исходный текст описания экспоната..." />
             </div>
             <div>
               <label class="block text-xs font-medium text-slate-500 mb-1">Адаптированный текст (для РЖЯ)</label>
-              <textarea v-model="editAdaptedText" rows="6" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-mono outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100" placeholder="Адаптированный текст после обработки или ручной правки..." />
+              <textarea v-model="editAdaptedText" rows="6" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-mono outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100" placeholder="Адаптированный текст после обработки или ручной правки..." />
             </div>
             <div class="flex gap-2">
-              <button class="rounded-lg bg-cyan-600 px-3 py-1.5 text-sm text-white hover:bg-cyan-700 disabled:bg-slate-300" :disabled="isSaving" @click="saveContent">
+              <button class="rounded-lg bg-violet-600 px-3 py-1.5 text-sm text-white hover:bg-violet-700 disabled:bg-slate-300" :disabled="isSaving" @click="saveContent">
                 {{ isSaving ? 'Сохраняем...' : 'Сохранить контент' }}
               </button>
               <button class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50" @click="isEditingContent = false">Отмена</button>
@@ -108,8 +108,8 @@
             <p class="text-xs font-medium text-slate-500 mb-2">Исходный текст</p>
             <p class="text-sm text-slate-800 whitespace-pre-wrap">{{ currentVersion.sourceText }}</p>
           </div>
-          <div v-if="currentVersion.adaptedText" class="rounded-xl bg-cyan-50 border border-cyan-100 p-4">
-            <p class="text-xs font-medium text-cyan-600 mb-2">Адаптированный текст</p>
+          <div v-if="currentVersion.adaptedText" class="rounded-xl bg-violet-50 border border-violet-100 p-4">
+            <p class="text-xs font-medium text-violet-600 mb-2">Адаптированный текст</p>
             <p class="text-sm text-slate-800 whitespace-pre-wrap">{{ currentVersion.adaptedText }}</p>
           </div>
           <p v-if="!currentVersion.sourceText && !currentVersion.adaptedText" class="text-sm text-slate-500">Контент ещё не добавлен. Нажмите «Редактировать контент».</p>
@@ -138,7 +138,7 @@
         <div class="space-y-2">
           <textarea
             v-model="reviewComment"
-            class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100"
+            class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
             rows="2"
             placeholder="Комментарий к согласованию"
           />
@@ -277,7 +277,7 @@ const actionLabels: Record<WorkflowAction, string> = {
 const versionStatusClass = (status: VersionStatus) => {
   if (status === 'published') return 'bg-green-100 text-green-700'
   if (status === 'on_review') return 'bg-amber-100 text-amber-700'
-  if (status === 'approved') return 'bg-cyan-100 text-cyan-700'
+  if (status === 'approved') return 'bg-violet-100 text-violet-700'
   if (status === 'needs_revision') return 'bg-rose-100 text-rose-700'
   return 'bg-gray-100 text-gray-600'
 }

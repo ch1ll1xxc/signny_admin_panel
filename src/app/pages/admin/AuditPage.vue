@@ -4,12 +4,12 @@
 
     <div class="space-y-4">
       <div class="grid gap-3 md:grid-cols-2">
-        <select v-model="actorFilter" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100">
+        <select v-model="actorFilter" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-violet-400 focus:ring-2 focus:ring-violet-100">
           <option value="all">Все пользователи</option>
           <option v-for="actor in actors" :key="actor" :value="actor">{{ actor }}</option>
         </select>
 
-        <select v-model="outcomeFilter" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100">
+        <select v-model="outcomeFilter" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-violet-400 focus:ring-2 focus:ring-violet-100">
           <option value="all">Все результаты</option>
           <option value="success">Успех</option>
           <option value="rejected">Отклонено</option>

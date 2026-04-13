@@ -11,7 +11,7 @@
 
         <button
           v-if="canWrite"
-          class="rounded-xl bg-cyan-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-cyan-700"
+          class="rounded-xl bg-violet-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-violet-700"
           @click="showAddForm = !showAddForm"
         >
           {{ showAddForm ? 'Скрыть форму' : 'Добавить FAQ' }}
@@ -25,28 +25,28 @@
             v-model="newQuestion"
             type="text"
             placeholder="Вопрос"
-            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100"
+            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
           />
           <textarea
             v-model="newAnswer"
             placeholder="Ответ"
             rows="3"
-            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100"
+            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
           />
           <input
             v-model="newVideoUrl"
             type="text"
             placeholder="Ссылка на видео (необязательно)"
-            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100"
+            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
           />
           <textarea
             v-model="newSubtitles"
             placeholder="Субтитры (необязательно)"
             rows="2"
-            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100"
+            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
           />
           <button
-            class="rounded-xl bg-cyan-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-cyan-700 disabled:bg-slate-300"
+            class="rounded-xl bg-violet-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-violet-700 disabled:bg-slate-300"
             :disabled="!newQuestion.trim() || !newAnswer.trim() || isSubmitting"
             @click="handleAdd"
           >
@@ -67,28 +67,28 @@
             <input
               v-model="editQuestion"
               type="text"
-              class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100"
+              class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
             />
             <textarea
               v-model="editAnswer"
               rows="3"
-              class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100"
+              class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
             />
             <input
               v-model="editVideoUrl"
               type="text"
               placeholder="Ссылка на видео"
-              class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100"
+              class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
             />
             <textarea
               v-model="editSubtitles"
               rows="2"
               placeholder="Субтитры"
-              class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100"
+              class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
             />
             <div class="flex gap-2">
               <button
-                class="rounded-lg bg-cyan-600 px-3 py-1.5 text-sm text-white hover:bg-cyan-700 disabled:bg-slate-300"
+                class="rounded-lg bg-violet-600 px-3 py-1.5 text-sm text-white hover:bg-violet-700 disabled:bg-slate-300"
                 :disabled="isSubmitting"
                 @click="handleUpdate(item.id)"
               >
@@ -108,7 +108,7 @@
               <div class="flex-1">
                 <h3 class="font-semibold text-slate-900">{{ item.question }}</h3>
                 <p class="mt-1 text-sm text-slate-600">{{ item.answer }}</p>
-                <div v-if="item.videoUrl" class="mt-2 text-xs text-cyan-700">
+                <div v-if="item.videoUrl" class="mt-2 text-xs text-violet-700">
                   Видео: {{ item.videoUrl }}
                 </div>
                 <div v-if="item.subtitles" class="mt-1 text-xs text-slate-500">

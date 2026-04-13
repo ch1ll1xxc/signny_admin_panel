@@ -2,7 +2,7 @@
   <div class="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-950 px-4">
     <div class="pointer-events-none absolute inset-0">
       <div class="absolute -left-16 -top-16 h-64 w-64 rounded-full bg-rose-500/20 blur-3xl" />
-      <div class="absolute -right-12 -bottom-20 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl" />
+      <div class="absolute -right-12 -bottom-20 h-72 w-72 rounded-full bg-violet-500/20 blur-3xl" />
     </div>
 
     <div class="relative z-10 max-w-md rounded-2xl border border-white/25 bg-white/90 p-6 shadow-2xl backdrop-blur">
