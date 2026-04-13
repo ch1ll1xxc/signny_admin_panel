@@ -19,28 +19,28 @@ const transitionMap: Record<ContentLifecycleStatus, ContentLifecycleStatus[]> = 
 const seededVersions: ReviewVersion[] = [
   {
     id: 'ver-001',
-    exhibitTitle: 'Ancient pottery of Neolithic era',
+    exhibitTitle: 'Рождение стекла',
     status: 'on_review',
     submitterEmail: 'editor@museum.local',
     submittedAt: '2026-04-05T10:00:00Z',
   },
   {
     id: 'ver-002',
-    exhibitTitle: 'Medieval manuscripts',
+    exhibitTitle: 'Лесные саундскейпы',
     status: 'approved',
     submitterEmail: 'editor@museum.local',
     submittedAt: '2026-04-04T08:00:00Z',
     reviewerEmail: 'curator@museum.local',
-    reviewerComment: 'Narrative sequence is approved.',
+    reviewerComment: 'Нарративная последовательность одобрена.',
   },
   {
     id: 'ver-003',
-    exhibitTitle: '17th century coin collection',
+    exhibitTitle: 'Слои окаменелостей',
     status: 'needs_revision',
     submitterEmail: 'editor@museum.local',
     submittedAt: '2026-04-03T09:00:00Z',
     reviewerEmail: 'curator@museum.local',
-    reviewerComment: 'Need clearer subtitles timing.',
+    reviewerComment: 'Требуется корректировка таймингов субтитров.',
   },
 ]
 

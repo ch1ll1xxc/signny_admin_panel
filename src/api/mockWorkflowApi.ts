@@ -14,7 +14,7 @@ import type {
 } from '@/types/workflow'
 import { syncPublishedSnapshot } from '@/api/publicSyncApi'
 
-const WORKFLOW_STORAGE_KEY = 'signny-admin-workflow-state-v1'
+const WORKFLOW_STORAGE_KEY = 'signny-admin-workflow-state-v2'
 
 interface PersistedWorkflowState {
   exhibits: Exhibit[]
@@ -76,6 +76,7 @@ const exhibits: Exhibit[] = [
     title: 'Рождение стекла',
     owner: 'М. Иванов',
     summary: 'Коллекция о происхождении стеклоделия и реставрационных находках.',
+    description: 'Экспонат охватывает историю стеклоделия от античных мастерских до современных реставрационных лабораторий. Посетитель узнаёт, как менялись технологии выплавки и какую роль играло стекло в культуре разных эпох.',
     expositionId: 'exp-01',
     currentVersionId: 'v-101-2',
   },
@@ -84,6 +85,7 @@ const exhibits: Exhibit[] = [
     title: 'Лесные саундскейпы',
     owner: 'А. Петрова',
     summary: 'Иммерсивный экспонат с полевыми записями и картами маршрутов.',
+    description: 'Аудиальный экспонат, в котором посетитель погружается в звуки леса. Полевые записи сопровождаются картами маршрутов и пояснениями к каждому фрагменту звукового ландшафта.',
     expositionId: 'exp-02',
     currentVersionId: 'v-102-3',
   },
@@ -92,15 +94,16 @@ const exhibits: Exhibit[] = [
     title: 'Слои окаменелостей',
     owner: 'Д. Смирнов',
     summary: 'Маршрут по стратиграфии с интерактивными образцами.',
+    description: 'Интерактивная экспозиция, где посетитель последовательно изучает слои горных пород, рассматривает образцы окаменелостей и узнаёт об эволюции жизни через геологические эпохи.',
     expositionId: 'exp-03',
     currentVersionId: 'v-103-1',
   },
 ]
 
 const versions: Version[] = [
-  { id: 'v-101-2', exhibitId: 'x-101', number: 2, status: 'on_review', updatedAt: new Date().toISOString() },
-  { id: 'v-102-3', exhibitId: 'x-102', number: 3, status: 'draft', updatedAt: new Date().toISOString() },
-  { id: 'v-103-1', exhibitId: 'x-103', number: 1, status: 'approved', updatedAt: new Date().toISOString() },
+  { id: 'v-101-2', exhibitId: 'x-101', number: 2, status: 'on_review', sourceText: 'Стеклоделие зародилось в Древнем Египте около 3500 лет до нашей эры. Первые изделия из стекла — бусины и амулеты — изготавливались из непрозрачного стекла.', adaptedText: 'Стекло появилось давно — в Египте. Сначала делали бусины. Потом научились делать прозрачное стекло.', updatedAt: new Date().toISOString() },
+  { id: 'v-102-3', exhibitId: 'x-102', number: 3, status: 'draft', sourceText: 'Полевые записи леса включают звуки птиц, ветра в кронах и шум ручья. Каждый фрагмент привязан к точке на маршруте.', updatedAt: new Date().toISOString() },
+  { id: 'v-103-1', exhibitId: 'x-103', number: 1, status: 'approved', sourceText: 'Стратиграфия — наука о последовательности залегания горных пород. Каждый слой хранит следы жизни определённой эпохи.', adaptedText: 'Земля состоит из слоёв. В каждом слое — свои окаменелости. Чем глубже — тем старше.', updatedAt: new Date().toISOString() },
 ]
 
 const reviewComments: ReviewComment[] = [
@@ -108,7 +111,7 @@ const reviewComments: ReviewComment[] = [
     id: 'c-1',
     versionId: 'v-101-2',
     authorRole: 'curator',
-    message: 'Please verify historical attribution in section 2.',
+    message: 'Проверьте историческую атрибуцию во втором разделе.',
     createdAt: new Date(Date.now() - 3_600_000).toISOString(),
   },
 ]
