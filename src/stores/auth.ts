@@ -2,7 +2,7 @@ import { computed, ref, watch } from 'vue'
 import { defineStore } from 'pinia'
 import type { Role } from '@/types/workflow'
 
-const ROLES: Role[] = ['editor', 'curator', 'admin']
+const ROLES: Role[] = ['editor', 'curator', 'admin', 'analyst']
 const STORAGE_KEY = 'museum-cms-role'
 
 const resolveInitialRole = (): Role => {

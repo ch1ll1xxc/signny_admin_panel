@@ -8,65 +8,29 @@
     <div class="relative z-10 w-full max-w-5xl overflow-hidden rounded-3xl border border-white/70 bg-white/90 shadow-2xl backdrop-blur md:grid md:grid-cols-2">
       <section class="hidden border-r border-slate-200/70 bg-gradient-to-br from-slate-900 to-violet-900 p-10 text-slate-100 md:block">
         <p class="text-xs font-semibold uppercase tracking-[0.25em] text-violet-200">Signny Admin</p>
-        <h1 class="mt-6 text-4xl font-bold leading-tight">Curation Control Deck</h1>
+        <h1 class="mt-6 text-4xl font-bold leading-tight">Панель управления</h1>
         <p class="mt-4 text-sm text-violet-100/90">
-          Unified panel for moderation workflow, publishing, and public contour sync.
+          Единая система модерации, публикации и синхронизации с публичным контуром.
         </p>
 
         <ul class="mt-8 space-y-3 text-sm">
-          <li class="rounded-xl bg-white/10 px-4 py-3">Fast demo login with role presets</li>
-          <li class="rounded-xl bg-white/10 px-4 py-3">Server-backed lifecycle and audit flow</li>
-          <li class="rounded-xl bg-white/10 px-4 py-3">Responsive dashboard for desktop and laptop</li>
+          <li class="rounded-xl bg-white/10 px-4 py-3">Авторизация по email и паролю</li>
+          <li class="rounded-xl bg-white/10 px-4 py-3">Полный цикл модерации и аудита</li>
+          <li class="rounded-xl bg-white/10 px-4 py-3">Адаптивный интерфейс для любого устройства</li>
         </ul>
       </section>
 
       <section class="p-6 sm:p-8 md:p-10">
-        <h2 class="text-2xl font-bold text-slate-900">Sign in</h2>
-        <p class="mt-1 text-sm text-slate-600">Демо-режим: пароль не обязателен.</p>
-
-        <div class="mt-5 flex flex-wrap gap-2">
-          <button
-            type="button"
-            class="rounded-xl bg-violet-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-violet-700"
-            data-testid="login-admin"
-            @click="quickLogin('admin@museum.local', 'admin')"
-          >
-            Войти как админ
-          </button>
-          <button
-            type="button"
-            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-violet-400 hover:bg-violet-50"
-            data-testid="login-editor"
-            @click="quickLogin('editor@museum.local', 'editor')"
-          >
-            Войти как редактор
-          </button>
-          <button
-            type="button"
-            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-violet-400 hover:bg-violet-50"
-            data-testid="login-curator"
-            @click="quickLogin('curator@museum.local', 'curator')"
-          >
-            Войти как куратор
-          </button>
-        </div>
+        <h2 class="text-2xl font-bold text-slate-900">Вход в систему</h2>
+        <p class="mt-1 text-sm text-slate-600">Введите учётные данные для доступа к административной панели.</p>
 
         <el-form label-position="top" class="mt-6" @submit.prevent="handleLogin">
           <el-form-item label="Email">
-            <el-input v-model="email" type="email" placeholder="admin@museum.local" />
+            <el-input v-model="email" type="email" placeholder="user@museum.local" />
           </el-form-item>
 
           <el-form-item label="Пароль">
-            <el-input v-model="password" type="password" show-password placeholder="Необязательно в демо" />
-          </el-form-item>
-
-          <el-form-item label="Роль">
-            <el-select v-model="role" class="w-full">
-              <el-option value="admin" label="Админ" />
-              <el-option value="editor" label="Редактор" />
-              <el-option value="curator" label="Куратор" />
-              <el-option value="analyst" label="Аналитик" />
-            </el-select>
+            <el-input v-model="password" type="password" show-password placeholder="Введите пароль" />
           </el-form-item>
 
           <div v-if="errorMessage" class="rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700">
@@ -74,12 +38,12 @@
           </div>
 
           <el-button type="primary" :loading="isLoading" class="w-full" native-type="submit">
-            Открыть админку
+            Войти
           </el-button>
         </el-form>
 
         <div class="mt-4 flex items-center justify-between gap-3 text-xs text-slate-500">
-          <span>Прямой вход: <code>/admin/login</code></span>
+          <span>&nbsp;</span>
           <el-button text type="primary" @click="resetLocalSession">Сбросить сессию</el-button>
         </div>
       </section>
@@ -93,28 +57,16 @@ import { useRouter, useRoute } from 'vue-router'
 import type { UserRole } from '../../domain/auth'
 import { useAuth } from '../../composables/useAuth'
 
+// unused presets removed — server determines role from user account
+
 const router = useRouter()
 const route = useRoute()
 const auth = useAuth()
 const { isLoading } = auth
 
-const email = ref('admin@museum.local')
-const password = ref('demo')
-const role = ref<UserRole>('admin')
+const email = ref('')
+const password = ref('')
 const errorMessage = ref('')
-
-const presets: Array<{ email: string; role: UserRole }> = [
-  { email: 'admin@museum.local', role: 'admin' },
-  { email: 'editor@museum.local', role: 'editor' },
-  { email: 'curator@museum.local', role: 'curator' },
-  { email: 'analyst@museum.local', role: 'analyst' },
-]
-
-const applyPreset = (nextEmail: string, nextRole: UserRole): void => {
-  email.value = nextEmail
-  role.value = nextRole
-  password.value = 'demo'
-}
 
 const resolveRedirect = (): string => {
   const redirect = route.query.redirect as string | undefined
@@ -124,29 +76,30 @@ const resolveRedirect = (): string => {
   return '/admin/dashboard'
 }
 
-const quickLogin = async (nextEmail: string, nextRole: UserRole): Promise<void> => {
-  applyPreset(nextEmail, nextRole)
-  await handleLogin()
-}
-
 const resetLocalSession = (): void => {
   auth.logout()
-  errorMessage.value = 'Session cleared. Sign in again.'
+  errorMessage.value = 'Сессия сброшена. Войдите снова.'
 }
 
 const handleLogin = async () => {
   if (!email.value) {
-    errorMessage.value = 'Fill email to continue.'
+    errorMessage.value = 'Введите email для продолжения.'
+    return
+  }
+  if (!password.value) {
+    errorMessage.value = 'Введите пароль.'
     return
   }
 
   errorMessage.value = ''
 
   try {
-    await auth.login(email.value, role.value, password.value || undefined)
+    // Role is determined by the server from the user's account, pass 'admin' as fallback
+    // since auth.login requires a role param but the server ignores it for JWT mode
+    await auth.login(email.value, 'admin' as UserRole, password.value)
     await router.replace(resolveRedirect())
   } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : 'Login failed. Try again.'
+    errorMessage.value = error instanceof Error ? error.message : 'Ошибка входа. Попробуйте снова.'
   }
 }
 

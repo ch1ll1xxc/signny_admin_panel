@@ -76,6 +76,33 @@ export const useMediaLibrary = () => {
     selectedMediaId.value = id
   }
 
+  const uploadFile = async (file: File): Promise<void> => {
+    const formData = new FormData()
+    formData.append('file', file, file.name)
+
+    const token = typeof window !== 'undefined' ? window.localStorage.getItem('session_token') : null
+    const baseUrl = import.meta.env.VITE_ADMIN_API_URL || 'http://localhost:4100'
+    const res = await fetch(`${baseUrl}/api/v1/media/upload`, {
+      method: 'POST',
+      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: formData,
+    })
+    if (!res.ok) throw new Error(`Upload failed: ${res.status}`)
+    await hydrateFromApi()
+  }
+
+  const deleteMedia = async (id: string): Promise<void> => {
+    const token = typeof window !== 'undefined' ? window.localStorage.getItem('session_token') : null
+    const baseUrl = import.meta.env.VITE_ADMIN_API_URL || 'http://localhost:4100'
+    const res = await fetch(`${baseUrl}/api/v1/media/${id}/delete`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    })
+    if (!res.ok) throw new Error(`Delete failed: ${res.status}`)
+    if (selectedMediaId.value === id) selectedMediaId.value = null
+    await hydrateFromApi()
+  }
+
   return {
     searchQuery,
     mediaFiles,
@@ -83,5 +110,7 @@ export const useMediaLibrary = () => {
     selectedMedia,
     selectMedia,
     hydrateFromApi,
+    uploadFile,
+    deleteMedia,
   }
 }

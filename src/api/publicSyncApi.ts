@@ -29,7 +29,7 @@ function buildPayload(exhibits: Exhibit[], versions: Version[], faqItems: AdminF
       slug: slugify(item.title),
       title: item.title,
       status: 'published',
-      description: item.summary,
+      description: item.description ?? '',
       created_at: nowIso,
       updated_at: nowIso,
     }))
@@ -38,7 +38,7 @@ function buildPayload(exhibits: Exhibit[], versions: Version[], faqItems: AdminF
     .filter((item) => item.isPublished)
     .map((item, index) => ({
       id: item.id,
-      exhibit_id: publishedExhibits[0]?.id ?? 'exhibit-001',
+      exhibit_id: item.exhibitId || publishedExhibits[0]?.id || 'exhibit-001',
       question: item.question,
       answer_text: item.answer,
       order_no: index + 1,

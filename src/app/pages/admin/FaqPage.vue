@@ -170,17 +170,39 @@ const filteredFaq = computed(() => {
   return faqItems.value.filter((f) => f.exhibitId === exhibitFilter.value)
 })
 
-const onVideoFile = (event: Event, target: 'new' | 'edit') => {
-  const file = (event.target as HTMLInputElement).files?.[0]
-  if (!file) return
-  const url = `/uploads/${file.name}`
-  if (target === 'new') newVideoUrl.value = url
-  else editVideoUrl.value = url
+const uploadFile = async (file: File): Promise<string> => {
+  const formData = new FormData()
+  formData.append('file', file, file.name)
+
+  const token = localStorage.getItem('session_token')
+  const baseUrl = import.meta.env.VITE_ADMIN_API_URL || 'http://localhost:4100'
+  const res = await fetch(`${baseUrl}/api/v1/media/upload`, {
+    method: 'POST',
+    headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    body: formData,
+  })
+  if (!res.ok) throw new Error(`Upload failed: ${res.status}`)
+  const data = await res.json() as { url: string }
+  return data.url
 }
 
-const onSubtitlesFile = (event: Event, target: 'new' | 'edit') => {
+const onVideoFile = async (event: Event, target: 'new' | 'edit') => {
   const file = (event.target as HTMLInputElement).files?.[0]
   if (!file) return
+  try {
+    const url = await uploadFile(file)
+    if (target === 'new') newVideoUrl.value = url
+    else editVideoUrl.value = url
+    notify.success('Видео загружено')
+  } catch (e) {
+    notify.error(e instanceof Error ? e.message : 'Ошибка загрузки видео')
+  }
+}
+
+const onSubtitlesFile = async (event: Event, target: 'new' | 'edit') => {
+  const file = (event.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  // For subtitles, read as text (small files)
   const reader = new FileReader()
   reader.onload = () => {
     const text = reader.result as string

@@ -20,7 +20,7 @@
         </div>
       </section>
 
-      <section class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <section class="grid grid-cols-1 gap-4 md:grid-cols-3 xl:grid-cols-6">
         <article
           v-for="card in metricCards"
           :key="card.key"
@@ -149,11 +149,19 @@ const { canSync, isSyncing, syncMessage, syncPublicContour } =
 const metricCards = computed(() => [
   {
     key: 'total',
-    label: 'Версий в работе',
+    label: 'Всего версий',
     value: metrics.total,
     icon: DataAnalysis,
     iconClass: 'text-violet-600',
     bgClass: 'bg-violet-400',
+  },
+  {
+    key: 'draft',
+    label: 'Черновики',
+    value: metrics.draft,
+    icon: DataAnalysis,
+    iconClass: 'text-slate-500',
+    bgClass: 'bg-slate-400',
   },
   {
     key: 'review',
@@ -162,6 +170,14 @@ const metricCards = computed(() => [
     icon: WarningFilled,
     iconClass: 'text-amber-600',
     bgClass: 'bg-amber-400',
+  },
+  {
+    key: 'approved',
+    label: 'Согласовано',
+    value: metrics.approved,
+    icon: Check,
+    iconClass: 'text-violet-600',
+    bgClass: 'bg-violet-400',
   },
   {
     key: 'revision',
@@ -185,10 +201,22 @@ const progressLanes = computed(() => {
   const total = Math.max(metrics.total, 1)
   return [
     {
-      label: 'Согласование',
+      label: 'Черновики',
+      value: metrics.draft,
+      percentage: Math.round((metrics.draft / total) * 100),
+      color: '#94a3b8',
+    },
+    {
+      label: 'На согласовании',
       value: metrics.onReview,
       percentage: Math.round((metrics.onReview / total) * 100),
       color: '#f59e0b',
+    },
+    {
+      label: 'Согласовано',
+      value: metrics.approved,
+      percentage: Math.round((metrics.approved / total) * 100),
+      color: '#8b5cf6',
     },
     {
       label: 'Доработка',
@@ -197,7 +225,7 @@ const progressLanes = computed(() => {
       color: '#f43f5e',
     },
     {
-      label: 'Публикация',
+      label: 'Опубликовано',
       value: metrics.published,
       percentage: Math.round((metrics.published / total) * 100),
       color: '#10b981',

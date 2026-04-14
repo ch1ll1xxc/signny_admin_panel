@@ -43,6 +43,7 @@ export const useAuthStore = defineStore('auth', () => {
           expiresAtIso: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString(),
         }
       } else {
+        // In real mode, the role comes from the server — ignore the 'role' parameter
         const res = await fetch(`${API_BASE}/api/v1/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

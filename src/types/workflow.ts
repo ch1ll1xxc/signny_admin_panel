@@ -1,4 +1,4 @@
-export type Role = 'editor' | 'curator' | 'admin'
+export type Role = 'editor' | 'curator' | 'admin' | 'analyst'
 
 export type VersionStatus =
   | 'draft'
@@ -21,13 +21,16 @@ export type JobStatus = 'queued' | 'running' | 'completed'
 
 export interface Exhibit {
   id: string
+  slug: string
   title: string
+  description: string
+  imageUrl: string
+  status: string
   owner: string
-  summary: string
-  description?: string
-  imageUrl?: string
   expositionId: string
   currentVersionId: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface ExhibitListItem {

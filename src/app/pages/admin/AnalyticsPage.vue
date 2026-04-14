@@ -15,18 +15,27 @@
       </div>
 
       <section class="rounded-2xl border border-white/70 bg-white/85 p-4 shadow-sm backdrop-blur">
-        <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Последняя активность workflow</h3>
+        <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Последняя активность</h3>
         <ul class="mt-3 space-y-2">
           <li
             v-for="event in recentAudit"
             :key="event.id"
             class="rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-sm"
           >
-            <span class="font-medium text-slate-800">{{ event.action }}</span>
-            — {{ event.actorEmail }}, объект: {{ event.entity }}
-            <span class="ml-2 text-xs text-slate-500">{{ event.createdAt }}</span>
+            <div class="flex items-center justify-between">
+              <span class="font-medium text-slate-800">{{ event.action }}</span>
+              <span
+                class="rounded-full px-2 py-0.5 text-xs font-medium"
+                :class="event.outcome === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
+              >
+                {{ event.outcome === 'success' ? 'Успех' : 'Отклонено' }}
+              </span>
+            </div>
+            <p class="mt-1 text-xs text-slate-500">{{ event.actorEmail }} · {{ event.entity }} · {{ new Date(event.createdAt).toLocaleString('ru') }}</p>
+            <p v-if="event.note" class="mt-0.5 text-xs text-slate-400">{{ event.note }}</p>
           </li>
         </ul>
+        <p v-if="!recentAudit.length" class="mt-3 text-sm text-slate-500">Нет недавних действий.</p>
       </section>
     </div>
   </AdminLayout>

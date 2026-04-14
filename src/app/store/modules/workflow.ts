@@ -52,6 +52,7 @@ const seededAudit: AdminAuditEvent[] = [
     entity: 'ver-001',
     outcome: 'success',
     createdAt: '2026-04-05T10:01:00Z',
+    note: 'Отправлено на согласование куратору',
   },
   {
     id: 'audit-002',
@@ -60,6 +61,34 @@ const seededAudit: AdminAuditEvent[] = [
     entity: 'ver-002',
     outcome: 'success',
     createdAt: '2026-04-04T08:20:00Z',
+    note: 'Нарративная последовательность одобрена',
+  },
+  {
+    id: 'audit-003',
+    actorEmail: 'curator@museum.local',
+    action: 'request_revision',
+    entity: 'ver-003',
+    outcome: 'success',
+    createdAt: '2026-04-03T09:30:00Z',
+    note: 'Требуется корректировка таймингов субтитров',
+  },
+  {
+    id: 'audit-004',
+    actorEmail: 'admin@museum.local',
+    action: 'publish',
+    entity: 'ver-002',
+    outcome: 'success',
+    createdAt: '2026-04-04T12:00:00Z',
+    note: 'Опубликовано в публичный контур',
+  },
+  {
+    id: 'audit-005',
+    actorEmail: 'editor@museum.local',
+    action: 'submit_review',
+    entity: 'ver-003',
+    outcome: 'rejected',
+    createdAt: '2026-04-02T14:15:00Z',
+    note: 'Автоматическая проверка: отсутствует адаптированный текст',
   },
 ]
 
@@ -139,31 +168,30 @@ export const useWorkflowStore = defineStore('workflow', () => {
   }
 
   const hydrateState = (): void => {
-    if (isHydrated.value) {
-      return
-    }
+    if (!isHydrated.value) {
+      const rawVersions = localStorage.getItem(WORKFLOW_STORAGE_KEY)
+      const rawAudit = localStorage.getItem(AUDIT_STORAGE_KEY)
 
-    const rawVersions = localStorage.getItem(WORKFLOW_STORAGE_KEY)
-    const rawAudit = localStorage.getItem(AUDIT_STORAGE_KEY)
-
-    if (rawVersions) {
-      try {
-        versions.value = JSON.parse(rawVersions) as ReviewVersion[]
-      } catch {
-        versions.value = seededVersions
+      if (rawVersions) {
+        try {
+          versions.value = JSON.parse(rawVersions) as ReviewVersion[]
+        } catch {
+          versions.value = seededVersions
+        }
       }
-    }
 
-    if (rawAudit) {
-      try {
-        auditEvents.value = JSON.parse(rawAudit) as AdminAuditEvent[]
-      } catch {
-        auditEvents.value = seededAudit
+      if (rawAudit) {
+        try {
+          auditEvents.value = JSON.parse(rawAudit) as AdminAuditEvent[]
+        } catch {
+          auditEvents.value = seededAudit
+        }
       }
+
+      isHydrated.value = true
     }
 
-    isHydrated.value = true
-
+    // Always sync from API to pick up fresh data (publish, transitions, etc.)
     void syncFromApi().catch(() => {
       // keep local fallback state when backend is unavailable
     })
@@ -175,13 +203,16 @@ export const useWorkflowStore = defineStore('workflow', () => {
 
   const metrics = computed(() => {
     const total = versions.value.length
-    const published = versions.value.filter((version) => version.status === 'published').length
+    const draft = versions.value.filter((version) => version.status === 'draft').length
     const onReview = versions.value.filter((version) => version.status === 'on_review').length
+    const approved = versions.value.filter((version) => version.status === 'approved').length
+    const published = versions.value.filter((version) => version.status === 'published').length
     const needsRevision = versions.value.filter(
       (version) => version.status === 'needs_revision',
     ).length
+    const archived = versions.value.filter((version) => version.status === 'archived').length
 
-    return { total, published, onReview, needsRevision }
+    return { total, draft, onReview, approved, published, needsRevision, archived }
   })
 
   const appendAuditEvent = (

@@ -4,9 +4,9 @@ import type { HallSummary } from '../domain/catalog'
 const HALLS_STORAGE_KEY = 'admin_halls'
 
 const hallSeed: HallSummary[] = [
-  { id: 1, name: 'Archaeology', code: 'archaeology', exhibitsCount: 12 },
-  { id: 2, name: 'History', code: 'history', exhibitsCount: 8 },
-  { id: 3, name: 'Numismatics', code: 'numismatics', exhibitsCount: 6 },
+  { id: 1, name: 'Археология', code: 'archaeology', exhibitsCount: 12 },
+  { id: 2, name: 'История', code: 'history', exhibitsCount: 8 },
+  { id: 3, name: 'Нумизматика', code: 'numismatics', exhibitsCount: 6 },
 ]
 
 function loadHalls(): HallSummary[] {
@@ -30,6 +30,15 @@ export const useHallsManager = () => {
     persistHalls(halls.value)
   }
 
+  const updateHall = (id: number, name: string, code: string): void => {
+    const hall = halls.value.find((h) => h.id === id)
+    if (hall) {
+      hall.name = name
+      hall.code = code
+      persistHalls(halls.value)
+    }
+  }
+
   const deleteHall = (id: number): void => {
     halls.value = halls.value.filter((hall) => hall.id !== id)
     persistHalls(halls.value)
@@ -38,6 +47,7 @@ export const useHallsManager = () => {
   return {
     halls,
     createHall,
+    updateHall,
     deleteHall,
   }
 }

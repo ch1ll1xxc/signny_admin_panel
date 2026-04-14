@@ -149,11 +149,13 @@ import { onMounted, ref } from 'vue'
 import AdminLayout from '../../components/layout/AdminLayout.vue'
 import { useAuth } from '../../composables/useAuth'
 import { useNotify } from '../../composables/useNotify'
+import { useWorkflowStore } from '../../store/modules/workflow'
 import { workflowApi } from '@/api/workflowApi'
 import type { ExhibitListItem, AdminFaqItem } from '@/types/workflow'
 
 const auth = useAuth()
 const notify = useNotify()
+const workflow = useWorkflowStore()
 
 const isChecking = ref(false)
 const isPublishing = ref(false)
@@ -179,6 +181,10 @@ const handlePublish = async () => {
     const role = auth.user.value?.role as 'admin' ?? 'admin'
     publishResult.value = await workflowApi.publishApproved(role)
     preflightResult.value = null
+    // Refresh workflow store so dashboard picks up new statuses
+    workflow.hydrateState()
+    // Reload exhibit list on this page
+    loadExhibitsAndFaq()
     notify.success(`Опубликовано: ${publishResult.value.publishedCount} версий`)
   } catch (e) {
     notify.error(e instanceof Error ? e.message : 'Ошибка публикации')

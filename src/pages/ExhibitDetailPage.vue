@@ -4,7 +4,7 @@
 
     <header class="rounded-lg border border-slate-200 bg-white p-5">
       <h1 class="text-2xl font-semibold">{{ exhibit?.title ?? `Exhibit ${exhibitId}` }}</h1>
-      <p class="mt-2 text-sm text-slate-600">{{ exhibit?.summary ?? 'Карточка экспоната с редакционным и публикационным контекстом' }}</p>
+      <p class="mt-2 text-sm text-slate-600">{{ exhibit?.description ?? 'Карточка экспоната с редакционным и публикационным контекстом' }}</p>
     </header>
 
     <article class="rounded-lg border border-slate-200 bg-white p-5">
