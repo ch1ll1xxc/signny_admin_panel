@@ -6,8 +6,6 @@ import ExhibitDetailPage from '../pages/admin/ExhibitDetailPage.vue'
 import UnauthorizedPage from '../pages/admin/UnauthorizedPage.vue'
 import MediaLibraryPage from '../pages/admin/MediaLibraryPage.vue'
 import HallsManagementPage from '../pages/admin/HallsManagementPage.vue'
-import ReviewQueuePage from '../pages/admin/ReviewQueuePage.vue'
-import FaqPage from '../pages/admin/FaqPage.vue'
 import PublishPage from '../pages/admin/PublishPage.vue'
 import ExportsPage from '../pages/admin/ExportsPage.vue'
 import AuditPage from '../pages/admin/AuditPage.vue'
@@ -83,24 +81,6 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiredPermission: 'halls.read',
-    },
-  },
-  {
-    path: '/admin/review',
-    name: 'AdminReview',
-    component: ReviewQueuePage,
-    meta: {
-      requiresAuth: true,
-      requiredPermission: 'exhibits.read',
-    },
-  },
-  {
-    path: '/admin/faq',
-    name: 'AdminFaq',
-    component: FaqPage,
-    meta: {
-      requiresAuth: true,
-      requiredPermission: 'faq.read',
     },
   },
   {

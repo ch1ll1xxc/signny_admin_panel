@@ -13,5 +13,9 @@ export const useNotify = () => {
     ElMessage({ message: text, type: 'info', duration: 3000 })
   }
 
-  return { success, error, info }
+  const warning = (text: string) => {
+    ElMessage({ message: text, type: 'warning', duration: 4000 })
+  }
+
+  return { success, error, info, warning }
 }

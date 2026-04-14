@@ -55,12 +55,12 @@ const transitionRules: Record<WorkflowAction, TransitionRule> = {
   publish: {
     from: ['approved'],
     to: 'published',
-    roles: ['admin'],
+    roles: ['curator', 'admin'],
   },
   archive: {
     from: ['published'],
     to: 'archived',
-    roles: ['admin'],
+    roles: ['curator', 'admin'],
   },
 }
 
@@ -70,33 +70,47 @@ const expositions: Exposition[] = [
   { id: 'exp-03', title: 'Слои окаменелостей', hall: 'Зал В' },
 ]
 
+const now = new Date().toISOString()
+
 const exhibits: Exhibit[] = [
   {
     id: 'x-101',
+    slug: 'rozhdenie-stekla',
     title: 'Рождение стекла',
+    description: 'Экспонат охватывает историю стеклоделия от античных мастерских до современных реставрационных лабораторий.',
+    imageUrl: '',
+    status: 'draft',
     owner: 'М. Иванов',
-    summary: 'Коллекция о происхождении стеклоделия и реставрационных находках.',
-    description: 'Экспонат охватывает историю стеклоделия от античных мастерских до современных реставрационных лабораторий. Посетитель узнаёт, как менялись технологии выплавки и какую роль играло стекло в культуре разных эпох.',
     expositionId: 'exp-01',
     currentVersionId: 'v-101-2',
+    createdAt: now,
+    updatedAt: now,
   },
   {
     id: 'x-102',
+    slug: 'lesnye-saundskeypy',
     title: 'Лесные саундскейпы',
+    description: 'Аудиальный экспонат, в котором посетитель погружается в звуки леса.',
+    imageUrl: '',
+    status: 'draft',
     owner: 'А. Петрова',
-    summary: 'Иммерсивный экспонат с полевыми записями и картами маршрутов.',
-    description: 'Аудиальный экспонат, в котором посетитель погружается в звуки леса. Полевые записи сопровождаются картами маршрутов и пояснениями к каждому фрагменту звукового ландшафта.',
     expositionId: 'exp-02',
     currentVersionId: 'v-102-3',
+    createdAt: now,
+    updatedAt: now,
   },
   {
     id: 'x-103',
+    slug: 'sloi-okamenelostey',
     title: 'Слои окаменелостей',
+    description: 'Интерактивная экспозиция с образцами окаменелостей и геологическими эпохами.',
+    imageUrl: '',
+    status: 'draft',
     owner: 'Д. Смирнов',
-    summary: 'Маршрут по стратиграфии с интерактивными образцами.',
-    description: 'Интерактивная экспозиция, где посетитель последовательно изучает слои горных пород, рассматривает образцы окаменелостей и узнаёт об эволюции жизни через геологические эпохи.',
     expositionId: 'exp-03',
     currentVersionId: 'v-103-1',
+    createdAt: now,
+    updatedAt: now,
   },
 ]
 
@@ -332,13 +346,19 @@ export const workflowApi = {
     }
     const exhibitId = nextId('x')
     const versionId = nextId('v')
+    const createNow = new Date().toISOString()
     const exhibit: Exhibit = {
       id: exhibitId,
+      slug: title.toLowerCase().replace(/[^a-zа-яё0-9]+/gi, '-').replace(/^-|-$/g, ''),
       title,
+      description: 'Черновик нового экспоната.',
+      imageUrl: '',
+      status: 'draft',
       owner: roleLabel(role),
-      summary: 'Черновик нового экспоната. Добавьте source-текст и запустите предобработку.',
       expositionId: expositions[0].id,
       currentVersionId: versionId,
+      createdAt: createNow,
+      updatedAt: createNow,
     }
     const version: Version = {
       id: versionId,
@@ -541,14 +561,13 @@ export const workflowApi = {
     return clone(nextItem)
   },
 
-  async updateExhibit(exhibitId: string, data: { title?: string; summary?: string; description?: string; imageUrl?: string }, role: Role): Promise<Exhibit> {
+  async updateExhibit(exhibitId: string, data: { title?: string; description?: string; imageUrl?: string }, role: Role): Promise<Exhibit> {
     await delay()
     if (!['editor', 'admin'].includes(role)) {
       throw new Error('Недостаточно прав для редактирования экспоната')
     }
     const exhibit = getExhibitById(exhibitId)
     if (data.title !== undefined) exhibit.title = data.title
-    if (data.summary !== undefined) exhibit.summary = data.summary
     if (data.description !== undefined) exhibit.description = data.description
     if (data.imageUrl !== undefined) exhibit.imageUrl = data.imageUrl
     pushAuditEvent('exhibit.updated', `Экспонат ${exhibitId} обновлён`, role)

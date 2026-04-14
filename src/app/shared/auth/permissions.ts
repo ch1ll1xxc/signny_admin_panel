@@ -27,8 +27,11 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
   curator: [
     'dashboard.read',
     'exhibits.read',
+    'exhibits.write',
     'media.read',
     'faq.read',
+    'faq.write',
+    'publish.execute',
     'exports.read',
   ],
   analyst: [

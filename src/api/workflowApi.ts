@@ -64,7 +64,7 @@ function resolveBearerRole(): string | null {
     return sessionToken
   }
 
-  const allowedLegacyRoles = new Set(['editor', 'curator', 'admin'])
+  const allowedLegacyRoles = new Set(['editor', 'curator', 'admin', 'analyst'])
 
   const legacyRole = window.localStorage.getItem('museum-cms-role')
   if (legacyRole && allowedLegacyRoles.has(legacyRole.toLowerCase())) {
@@ -193,7 +193,19 @@ export const workflowApi = {
       return mockWorkflowApi.listExpositions()
     }
 
-    return fallbackExpositions
+    try {
+      const exhibits = await request<Exhibit[]>('GET', '/exhibits')
+      const seen = new Map<string, Exposition>()
+      for (const ex of exhibits) {
+        const expId = ex.expositionId || 'exp-01'
+        if (!seen.has(expId)) {
+          seen.set(expId, { id: expId, title: expId, hall: '' })
+        }
+      }
+      return seen.size > 0 ? Array.from(seen.values()) : fallbackExpositions
+    } catch {
+      return fallbackExpositions
+    }
   },
 
   async listVersions(exhibitId: string): Promise<Version[]> {
@@ -316,7 +328,7 @@ export const workflowApi = {
     await request<void>('POST', `/faq/${faqId}/delete`, {})
   },
 
-  async updateExhibit(exhibitId: string, data: { title?: string; summary?: string; description?: string; imageUrl?: string }, role: Role): Promise<Exhibit> {
+  async updateExhibit(exhibitId: string, data: { title?: string; description?: string; imageUrl?: string }, role: Role): Promise<Exhibit> {
     if (config.useMockApi) {
       return mockWorkflowApi.updateExhibit(exhibitId, data, role)
     }
