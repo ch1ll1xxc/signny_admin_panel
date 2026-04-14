@@ -13,26 +13,19 @@
           v-if="canWrite"
           class="rounded-xl bg-violet-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-violet-700 disabled:bg-slate-300"
           :disabled="isCreating"
-          @click="showCreateDialog = true"
+          @click="handleCreate"
         >
-          Создать экспонат
+          {{ isCreating ? 'Создаем...' : 'Создать экспонат' }}
         </button>
       </div>
 
-      <!-- Create dialog -->
-      <el-dialog v-model="showCreateDialog" title="Новый экспонат" width="420px">
-        <el-form label-position="top">
-          <el-form-item label="Название">
-            <el-input v-model="newTitle" placeholder="Введите название экспоната" />
-          </el-form-item>
-        </el-form>
-        <template #footer>
-          <el-button @click="showCreateDialog = false">Отмена</el-button>
-          <el-button type="primary" :loading="isCreating" :disabled="!newTitle.trim()" @click="handleCreate">
-            Создать
-          </el-button>
-        </template>
-      </el-dialog>
+      <div class="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+        Новый экспонат создается как черновик: он виден в админке сразу, а в публичном контуре появится только после публикации.
+      </div>
+
+      <div v-if="createError" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+        {{ createError }}
+      </div>
 
       <div class="grid gap-3 md:grid-cols-3">
         <input
@@ -103,7 +96,7 @@ import AdminLayout from '../../components/layout/AdminLayout.vue'
 import { useAuth } from '../../composables/useAuth'
 import { useNotify } from '../../composables/useNotify'
 import { useExhibitsCatalog } from '../../composables/useExhibitsCatalog'
-import { workflowApi } from '@/api/workflowApi'
+import { ApiError, workflowApi } from '@/api/workflowApi'
 import type { VersionStatus } from '@/types/workflow'
 
 const auth = useAuth()
@@ -112,21 +105,31 @@ const canWrite = computed(() => auth.can('exhibits.write'))
 
 const { filteredExhibits, hallFilter, halls, searchQuery, statusFilter, isLoading, reload } = useExhibitsCatalog()
 
-const showCreateDialog = ref(false)
-const newTitle = ref('')
 const isCreating = ref(false)
+const createError = ref('')
 
 const handleCreate = async () => {
+  createError.value = ''
   isCreating.value = true
   try {
     const role = auth.user.value?.role as 'editor' | 'admin' ?? 'editor'
-    await workflowApi.createExhibit(newTitle.value.trim(), role)
-    newTitle.value = ''
-    showCreateDialog.value = false
-    notify.success('Экспонат создан')
+    const autoTitle = `Новый экспонат ${new Date().toLocaleString('ru-RU')}`
+    await workflowApi.createExhibit(autoTitle, role)
+    searchQuery.value = ''
+    hallFilter.value = 'all'
+    statusFilter.value = 'all'
+    notify.success('Экспонат создан как черновик. Для публичного контура требуется публикация.')
     await reload()
   } catch (e) {
-    notify.error(e instanceof Error ? e.message : 'Ошибка создания')
+    let message = e instanceof Error ? e.message : 'Ошибка создания'
+    if (e instanceof ApiError && e.statusCode === 403) {
+      message = 'Недостаточно прав для создания экспоната. Нужна роль редактора или администратора.'
+    }
+    if (e instanceof ApiError && e.statusCode === 401) {
+      message = 'Сессия истекла. Войдите заново и повторите создание.'
+    }
+    createError.value = message
+    notify.error(message)
   } finally {
     isCreating.value = false
   }

@@ -2,6 +2,7 @@ import {
   getAllowedActions as getAllowedActionsMock,
   workflowApi as mockWorkflowApi,
 } from '@/api/mockWorkflowApi'
+import { resolveAdminApiBaseUrl } from '@/api/adminApiBaseUrl'
 import type {
   AdminFaqItem,
   AuditEvent,
@@ -20,7 +21,7 @@ import type {
 } from '@/types/workflow'
 
 const config = {
-  baseUrl: import.meta.env.VITE_ADMIN_API_URL || 'http://localhost:4100',
+  baseUrl: resolveAdminApiBaseUrl({ envBaseUrl: import.meta.env.VITE_ADMIN_API_URL }),
   useMockApi: import.meta.env.VITE_USE_MOCK_API === 'true',
 }
 
@@ -58,8 +59,15 @@ function resolveBearerRole(): string | null {
     return null
   }
 
+  const sessionToken = window.localStorage.getItem('session_token')
+  if (sessionToken) {
+    return sessionToken
+  }
+
+  const allowedLegacyRoles = new Set(['editor', 'curator', 'admin'])
+
   const legacyRole = window.localStorage.getItem('museum-cms-role')
-  if (legacyRole) {
+  if (legacyRole && allowedLegacyRoles.has(legacyRole.toLowerCase())) {
     return legacyRole
   }
 
@@ -67,7 +75,7 @@ function resolveBearerRole(): string | null {
   if (rawSessionUser) {
     try {
       const parsed = JSON.parse(rawSessionUser) as { role?: string }
-      if (parsed.role) {
+      if (parsed.role && allowedLegacyRoles.has(parsed.role.toLowerCase())) {
         return parsed.role
       }
     } catch {

@@ -143,7 +143,7 @@ const handleLogin = async () => {
   errorMessage.value = ''
 
   try {
-    await auth.login(email.value, role.value)
+    await auth.login(email.value, role.value, password.value || undefined)
     await router.replace(resolveRedirect())
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : 'Login failed. Try again.'
