@@ -216,6 +216,14 @@ export const workflowApi = {
     return request<Version[]>('GET', `/exhibits/${exhibitId}/versions`)
   },
 
+  async createVersion(exhibitId: string): Promise<Version> {
+    if (config.useMockApi) {
+      return mockWorkflowApi.createVersion(exhibitId)
+    }
+
+    return request<Version>('POST', `/exhibits/${exhibitId}/versions`, {})
+  },
+
   async listReviewComments(versionId: string): Promise<ReviewComment[]> {
     if (config.useMockApi) {
       return mockWorkflowApi.listReviewComments(versionId)
@@ -406,6 +414,22 @@ export const workflowApi = {
     }
 
     return request<MediaAsset>('POST', '/media/upload', { fileName, mimeType, url })
+  },
+
+  async uploadFile(file: File): Promise<MediaAsset> {
+    const formData = new FormData()
+    formData.append('file', file)
+    const token = resolveBearerRole()
+    const response = await fetch(`${config.baseUrl}/api/v1/media/upload`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    })
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null)
+      throw mapErrorResponse(response.status, payload)
+    }
+    return response.json() as Promise<MediaAsset>
   },
 
   async listQrCodes(): Promise<QrCodeEntry[]> {

@@ -50,9 +50,15 @@
               </div>
             </div>
             <div>
-              <label class="block text-xs font-medium text-slate-500 mb-1">3D-модель (GLB/GLTF)</label>
-              <input v-model="editModel3dUrl" type="text" placeholder="https://cdn.example.com/model.glb" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100" />
-              <p class="mt-1 text-xs text-slate-400">Ссылка на 3D-модель для AR-просмотра (.glb, .gltf)</p>
+              <label class="block text-xs font-medium text-slate-500 mb-1">AR-сцена (анимированная 3D-модель)</label>
+              <div v-if="editModel3dUrl" class="flex items-center gap-2 mb-2 rounded-lg bg-violet-50 border border-violet-200 px-3 py-2">
+                <span class="text-sm text-violet-700 truncate flex-1">{{ editModel3dUrl }}</span>
+                <button class="text-xs text-red-500 hover:text-red-700" @click="editModel3dUrl = ''">Удалить</button>
+              </div>
+              <label class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-600 hover:bg-slate-50">
+                <span>{{ isUploadingScene ? 'Загрузка...' : 'Загрузить файл (.glb, .gltf, .mp4)' }}</span>
+                <input type="file" accept=".glb,.gltf,.mp4,.fbx" class="hidden" :disabled="isUploadingScene" @change="uploadArScene" />
+              </label>
             </div>
             <div class="flex gap-2">
               <button class="rounded-lg bg-violet-600 px-3 py-1.5 text-sm text-white hover:bg-violet-700 disabled:bg-slate-300" :disabled="isSaving" @click="saveExhibit">
@@ -80,30 +86,91 @@
           </div>
           <p v-if="exhibit?.description" class="text-sm text-slate-700">{{ exhibit.description }}</p>
           <img v-if="exhibit?.imageUrl" :src="exhibit.imageUrl" alt="Фото экспоната" class="max-h-64 rounded-xl object-cover" />
-          <div v-if="(exhibit as any)?.model3dUrl" class="rounded-xl bg-sky-50 border border-sky-200 p-3">
-            <p class="text-xs font-medium text-sky-600 mb-1">3D-модель</p>
+          <div v-if="(exhibit as any)?.model3dUrl" class="rounded-xl bg-violet-50 border border-violet-200 p-3">
+            <p class="text-xs font-medium text-violet-600 mb-1">AR-сцена</p>
             <p class="text-sm text-slate-700 break-all">{{ (exhibit as any).model3dUrl }}</p>
           </div>
         </template>
       </div>
 
-      <!-- Контент версии -->
+      <!-- Контент и версии -->
       <div v-if="currentVersion" class="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
+        <!-- Заголовок с версией и статусом -->
         <div class="flex items-center justify-between">
-          <h2 class="text-lg font-semibold text-slate-900">Контент версии v{{ currentVersion.number }}</h2>
+          <div class="flex items-center gap-3">
+            <h2 class="text-lg font-semibold text-slate-900">Версия {{ currentVersion.number }}</h2>
+            <span class="rounded-full px-2.5 py-1 text-xs font-medium" :class="versionStatusClass(currentVersion.status)">
+              {{ statusLabels[currentVersion.status] }}
+            </span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button
+              v-if="canWrite && canEditContent && !isEditingContent"
+              class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
+              @click="startEditContent"
+            >
+              Редактировать
+            </button>
+            <button
+              v-if="canWrite && canEditContent"
+              class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+              :disabled="isJobRunning"
+              @click="runPreprocess"
+            >
+              {{ isJobRunning ? 'Обработка...' : 'Предобработка РЖЯ' }}
+            </button>
+          </div>
+        </div>
+
+        <p v-if="errorMessage" class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{{ errorMessage }}</p>
+
+        <!-- Баннер: опубликовано — предложить новую версию -->
+        <div v-if="currentVersion.status === 'published'" class="rounded-xl bg-green-50 border border-green-200 p-4 flex items-center justify-between">
+          <p class="text-sm text-green-800">Контент опубликован и доступен на сайте.</p>
+          <div class="flex gap-2">
+            <button
+              v-if="canWrite"
+              class="rounded-lg bg-violet-600 px-3 py-1.5 text-sm text-white hover:bg-violet-700 disabled:bg-slate-300"
+              :disabled="isCreatingVersion"
+              @click="createNewVersion"
+            >
+              {{ isCreatingVersion ? 'Создаём...' : 'Новая версия' }}
+            </button>
+            <button
+              v-if="canPublish"
+              class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+              :disabled="isTransitioning"
+              @click="applyAction('archive')"
+            >
+              В архив
+            </button>
+          </div>
+        </div>
+
+        <!-- Баннер: архив -->
+        <div v-else-if="currentVersion.status === 'archived'" class="rounded-xl bg-slate-100 border border-slate-200 p-4 flex items-center justify-between">
+          <p class="text-sm text-slate-600">Версия в архиве.</p>
           <button
-            v-if="canWrite && canEditContent && !isEditingContent"
-            class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
-            @click="startEditContent"
+            v-if="canWrite"
+            class="rounded-lg bg-violet-600 px-3 py-1.5 text-sm text-white hover:bg-violet-700 disabled:bg-slate-300"
+            :disabled="isCreatingVersion"
+            @click="createNewVersion"
           >
-            Редактировать контент
+            {{ isCreatingVersion ? 'Создаём...' : 'Новая версия' }}
           </button>
         </div>
 
+        <!-- Редактирование контента -->
         <template v-if="isEditingContent">
           <div class="space-y-3">
             <div>
-              <label class="block text-xs font-medium text-slate-500 mb-1">Исходный текст (русский)</label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="text-xs font-medium text-slate-500">Исходный текст (русский)</label>
+                <label class="cursor-pointer rounded-lg border border-slate-300 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50">
+                  Загрузить из файла
+                  <input type="file" accept=".txt,.doc,.docx" class="hidden" @change="loadSourceFromFile" />
+                </label>
+              </div>
               <textarea v-model="editSourceText" rows="6" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-mono outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100" placeholder="Введите исходный текст описания экспоната..." />
             </div>
             <div>
@@ -112,14 +179,15 @@
             </div>
             <div class="flex gap-2">
               <button class="rounded-lg bg-violet-600 px-3 py-1.5 text-sm text-white hover:bg-violet-700 disabled:bg-slate-300" :disabled="isSaving" @click="saveContent">
-                {{ isSaving ? 'Сохраняем...' : 'Сохранить контент' }}
+                {{ isSaving ? 'Сохраняем...' : 'Сохранить' }}
               </button>
               <button class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50" @click="isEditingContent = false">Отмена</button>
             </div>
           </div>
         </template>
 
-        <template v-else>
+        <!-- Просмотр контента -->
+        <template v-else-if="currentVersion.status !== 'published' && currentVersion.status !== 'archived'">
           <div v-if="currentVersion.sourceText" class="rounded-xl bg-slate-50 p-4">
             <p class="text-xs font-medium text-slate-500 mb-2">Исходный текст</p>
             <p class="text-sm text-slate-800 whitespace-pre-wrap">{{ currentVersion.sourceText }}</p>
@@ -128,8 +196,45 @@
             <p class="text-xs font-medium text-violet-600 mb-2">Адаптированный текст</p>
             <p class="text-sm text-slate-800 whitespace-pre-wrap">{{ currentVersion.adaptedText }}</p>
           </div>
-          <p v-if="!currentVersion.sourceText && !currentVersion.adaptedText" class="text-sm text-slate-500">Контент ещё не добавлен. Нажмите «Редактировать контент».</p>
+          <p v-if="!currentVersion.sourceText && !currentVersion.adaptedText" class="text-sm text-slate-500">Контент ещё не добавлен. Нажмите «Редактировать».</p>
         </template>
+
+        <!-- Кнопка публикации (для черновиков) -->
+        <div v-if="canPublish && !['published', 'archived'].includes(currentVersion.status)" class="pt-2 border-t border-slate-100">
+          <button
+            class="rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-violet-700 disabled:bg-slate-300"
+            :disabled="isTransitioning"
+            @click="quickPublish"
+          >
+            {{ isTransitioning ? 'Публикуем...' : 'Опубликовать' }}
+          </button>
+          <p class="mt-1 text-xs text-slate-400">Контент пройдёт согласование и появится на публичном сайте.</p>
+        </div>
+
+        <!-- Компактная история версий -->
+        <div v-if="versions.length > 1" class="pt-2 border-t border-slate-100">
+          <button class="text-xs text-slate-500 hover:text-slate-700" @click="showVersionHistory = !showVersionHistory">
+            {{ showVersionHistory ? 'Скрыть историю' : `Показать все версии (${versions.length})` }}
+          </button>
+          <div v-if="showVersionHistory" class="mt-2 space-y-1">
+            <div v-for="version in versions" :key="version.id" class="flex items-center justify-between rounded-lg px-3 py-2 text-xs" :class="version.id === currentVersion.id ? 'bg-violet-50' : 'bg-slate-50'">
+              <div class="flex items-center gap-2">
+                <span class="font-medium">v{{ version.number }}</span>
+                <span class="rounded-full px-1.5 py-0.5 text-[10px] font-medium" :class="versionStatusClass(version.status)">{{ statusLabels[version.status] }}</span>
+                <span class="text-slate-400">{{ new Date(version.updatedAt).toLocaleDateString('ru') }}</span>
+              </div>
+              <button
+                v-if="version.id !== currentVersion.id && canWrite"
+                class="rounded px-2 py-0.5 text-violet-600 hover:bg-violet-100 disabled:opacity-50"
+                :disabled="isSwitchingVersion"
+                @click="switchToVersion(version)"
+              >
+                Переключиться
+              </button>
+              <span v-else-if="version.id === currentVersion.id" class="text-violet-600 font-medium">текущая</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- FAQ экспоната -->
@@ -158,6 +263,10 @@
             <label class="block text-xs font-medium text-slate-500 mb-1">URL видео (необязательно)</label>
             <input v-model="newFaqVideoUrl" type="text" placeholder="https://..." class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-violet-400" />
           </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">Субтитры (необязательно)</label>
+            <textarea v-model="newFaqSubtitles" rows="2" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-mono outline-none focus:border-violet-400" placeholder="Текст субтитров или URL файла (.vtt, .srt)" />
+          </div>
           <button class="rounded-lg bg-violet-600 px-3 py-1.5 text-sm text-white hover:bg-violet-700 disabled:bg-slate-300" :disabled="!newFaqQuestion.trim() || !newFaqAnswer.trim()" @click="addFaq">
             Сохранить вопрос
           </button>
@@ -169,6 +278,7 @@
               <p class="text-sm font-medium text-slate-800">{{ faq.question }}</p>
               <p class="mt-1 text-sm text-slate-600">{{ faq.answer }}</p>
               <p v-if="faq.videoUrl" class="mt-1 text-xs text-violet-600">Видео: {{ faq.videoUrl }}</p>
+              <p v-if="faq.subtitles" class="mt-0.5 text-xs text-slate-400">Субтитры: {{ faq.subtitles.slice(0, 80) }}{{ faq.subtitles.length > 80 ? '...' : '' }}</p>
             </div>
             <div class="flex items-center gap-2">
               <button
@@ -185,98 +295,30 @@
         <p v-if="!exhibitFaq.length" class="text-sm text-slate-500">FAQ пока не добавлен.</p>
       </div>
 
-      <!-- Публикация -->
-      <div class="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
-        <h2 class="text-lg font-semibold text-slate-900">Публикация</h2>
-
-        <p v-if="errorMessage" class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{{ errorMessage }}</p>
-
-        <div v-if="currentVersion?.status === 'published'" class="rounded-xl bg-green-50 border border-green-200 p-4">
-          <p class="text-sm font-medium text-green-800">Экспонат опубликован</p>
-          <button
-            v-if="canPublish"
-            class="mt-2 rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-            :disabled="isTransitioning"
-            @click="applyAction('archive')"
-          >
-            В архив
-          </button>
-        </div>
-
-        <div v-else-if="currentVersion?.status === 'archived'" class="rounded-xl bg-slate-50 border border-slate-200 p-4">
-          <p class="text-sm font-medium text-slate-600">Экспонат в архиве</p>
-        </div>
-
-        <div v-else-if="currentVersion && canPublish" class="space-y-3">
-          <div class="rounded-xl bg-slate-50 p-3">
-            <p class="text-xs text-slate-500">Текущий статус</p>
-            <p class="font-medium">{{ statusLabels[currentVersion.status] }}</p>
-          </div>
-          <button
-            class="rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-violet-700 disabled:bg-slate-300"
-            :disabled="isTransitioning"
-            @click="quickPublish"
-          >
-            {{ isTransitioning ? 'Публикуем...' : 'Опубликовать' }}
-          </button>
-          <p class="text-xs text-slate-400">Экспонат пройдёт согласование и будет синхронизирован с публичным сайтом.</p>
-        </div>
-
-        <div v-else-if="currentVersion" class="rounded-xl bg-slate-50 p-3">
-          <p class="text-xs text-slate-500">Текущий статус</p>
-          <p class="font-medium">{{ statusLabels[currentVersion.status] }}</p>
-        </div>
-
+      <!-- Комментарии -->
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 space-y-3">
+        <h2 class="text-lg font-semibold text-slate-900">Комментарии</h2>
         <div class="space-y-2">
           <textarea
             v-model="reviewComment"
             class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
             rows="2"
-            placeholder="Комментарий"
+            placeholder="Написать комментарий..."
           />
           <button
             class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-50"
             :disabled="!reviewComment.trim() || isCommentSubmitting"
             @click="submitComment"
           >
-            {{ isCommentSubmitting ? 'Сохраняем...' : 'Добавить комментарий' }}
+            {{ isCommentSubmitting ? 'Сохраняем...' : 'Отправить' }}
           </button>
         </div>
-      </div>
-
-      <!-- Комментарии -->
-      <div class="rounded-2xl border border-slate-200 bg-white p-5 space-y-3">
-        <h2 class="text-lg font-semibold text-slate-900">Комментарии</h2>
         <div v-for="comment in comments" :key="comment.id" class="rounded-xl bg-slate-50 p-3 text-sm">
           <p class="font-medium text-slate-800">{{ comment.authorRole }}</p>
           <p class="text-slate-600">{{ comment.message }}</p>
           <p class="mt-1 text-xs text-slate-400">{{ new Date(comment.createdAt).toLocaleString('ru') }}</p>
         </div>
         <p v-if="!comments.length" class="text-sm text-slate-500">Комментариев пока нет.</p>
-      </div>
-
-      <!-- Задачи -->
-      <div class="rounded-2xl border border-slate-200 bg-white p-5 space-y-3">
-        <div class="flex items-center justify-between">
-          <h2 class="text-lg font-semibold text-slate-900">Задачи</h2>
-          <div class="flex gap-2">
-            <button
-              v-if="canWrite"
-              class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-              :disabled="isJobRunning"
-              @click="runPreprocess"
-            >
-              {{ isJobRunning ? 'Выполняем...' : 'Запустить предобработку' }}
-            </button>
-          </div>
-        </div>
-        <div v-for="job in versionJobs" :key="job.id" class="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
-          <span>{{ job.type }}</span>
-          <span class="rounded-full px-2 py-1 text-xs font-medium" :class="job.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'">
-            {{ job.status }}
-          </span>
-        </div>
-        <p v-if="!versionJobs.length" class="text-sm text-slate-500">Задач пока нет.</p>
       </div>
 
       <!-- QR-код -->
@@ -310,41 +352,6 @@
         </div>
       </div>
 
-      <!-- Версии -->
-      <div class="rounded-2xl border border-slate-200 bg-white p-5 space-y-3">
-        <h2 class="text-lg font-semibold text-slate-900">История версий</h2>
-        <div v-for="version in versions" :key="version.id" class="rounded-xl bg-slate-50 p-3 text-sm space-y-2">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span class="font-medium">v{{ version.number }}</span>
-              <span v-if="version.id === exhibit?.currentVersionId" class="rounded-full bg-violet-100 px-2 py-0.5 text-xs text-violet-700">текущая</span>
-            </div>
-            <span class="rounded-full px-2 py-1 text-xs font-medium" :class="versionStatusClass(version.status)">
-              {{ statusLabels[version.status] }}
-            </span>
-          </div>
-          <p class="text-xs text-slate-400">{{ new Date(version.updatedAt).toLocaleString('ru') }}</p>
-          <button
-            v-if="version.id !== exhibit?.currentVersionId"
-            class="text-xs text-violet-600 hover:text-violet-800"
-            @click="viewVersion(version)"
-          >
-            Просмотреть контент
-          </button>
-          <div v-if="expandedVersionId === version.id" class="mt-2 space-y-2 rounded-lg bg-white p-3 border border-slate-200">
-            <div v-if="version.sourceText">
-              <p class="text-xs font-medium text-slate-500">Исходный текст</p>
-              <p class="text-sm text-slate-700 whitespace-pre-wrap">{{ version.sourceText }}</p>
-            </div>
-            <div v-if="version.adaptedText">
-              <p class="text-xs font-medium text-violet-500">Адаптированный текст</p>
-              <p class="text-sm text-slate-700 whitespace-pre-wrap">{{ version.adaptedText }}</p>
-            </div>
-            <p v-if="!version.sourceText && !version.adaptedText" class="text-xs text-slate-400">Контент пуст</p>
-          </div>
-        </div>
-        <p v-if="!versions.length" class="text-sm text-slate-500">Версий пока нет.</p>
-      </div>
     </div>
   </AdminLayout>
 </template>
@@ -381,6 +388,7 @@ const showFaqForm = ref(false)
 const newFaqQuestion = ref('')
 const newFaqAnswer = ref('')
 const newFaqVideoUrl = ref('')
+const newFaqSubtitles = ref('')
 
 const isEditingExhibit = ref(false)
 const editTitle = ref('')
@@ -392,7 +400,15 @@ const expositions = ref<{ id: string; title: string; hall: string }[]>([])
 const newExpositionTitle = ref('')
 const newExpositionHall = ref('')
 const editModel3dUrl = ref('')
-const expandedVersionId = ref('')
+const isUploadingScene = ref(false)
+const showVersionHistory = ref(false)
+const isSwitchingVersion = ref(false)
+const isCreatingVersion = ref(false)
+
+const canCreateNewVersion = computed(() => {
+  if (!currentVersion.value) return false
+  return ['published', 'archived'].includes(currentVersion.value.status)
+})
 const isEditingContent = ref(false)
 const editSourceText = ref('')
 const editAdaptedText = ref('')
@@ -505,6 +521,36 @@ const startEditContent = () => {
   isEditingContent.value = true
 }
 
+const uploadArScene = async (event: Event) => {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+  isUploadingScene.value = true
+  try {
+    const media = await workflowApi.uploadFile(file)
+    editModel3dUrl.value = media.url
+    notify.success(`Загружен: ${file.name}`)
+  } catch (e) {
+    notify.error(e instanceof Error ? e.message : 'Ошибка загрузки файла')
+  } finally {
+    isUploadingScene.value = false
+    input.value = ''
+  }
+}
+
+const loadSourceFromFile = (event: Event) => {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = () => {
+    editSourceText.value = (reader.result as string).trim()
+    notify.success(`Загружен: ${file.name}`)
+  }
+  reader.readAsText(file, 'utf-8')
+  input.value = ''
+}
+
 const saveContent = async () => {
   if (!currentVersion.value) return
   isSaving.value = true
@@ -602,8 +648,32 @@ const runPreprocess = async () => {
   }
 }
 
-const viewVersion = (version: Version) => {
-  expandedVersionId.value = expandedVersionId.value === version.id ? '' : version.id
+const createNewVersion = async () => {
+  isCreatingVersion.value = true
+  try {
+    await workflowApi.createVersion(exhibitId.value)
+    notify.success('Новая версия создана')
+    await refresh()
+  } catch (e) {
+    notify.error(e instanceof Error ? e.message : 'Ошибка создания версии')
+  } finally {
+    isCreatingVersion.value = false
+  }
+}
+
+const switchToVersion = async (version: Version) => {
+  isSwitchingVersion.value = true
+  try {
+    await workflowApi.updateExhibit(exhibitId.value, {
+      currentVersionId: version.id,
+    } as Record<string, string>, userRole.value)
+    notify.success(`Переключено на версию ${version.number}`)
+    await refresh()
+  } catch (e) {
+    notify.error(e instanceof Error ? e.message : 'Ошибка переключения версии')
+  } finally {
+    isSwitchingVersion.value = false
+  }
 }
 
 // --- FAQ ---
@@ -614,10 +684,12 @@ const addFaq = async () => {
       question: newFaqQuestion.value.trim(),
       answer: newFaqAnswer.value.trim(),
       videoUrl: newFaqVideoUrl.value.trim() || undefined,
+      subtitles: newFaqSubtitles.value.trim() || undefined,
     }, userRole.value)
     newFaqQuestion.value = ''
     newFaqAnswer.value = ''
     newFaqVideoUrl.value = ''
+    newFaqSubtitles.value = ''
     showFaqForm.value = false
     notify.success('Вопрос добавлен')
     await refresh()

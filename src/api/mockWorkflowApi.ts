@@ -406,6 +406,28 @@ export const workflowApi = {
     return clone(versions.filter((version) => version.exhibitId === exhibitId).sort((a, b) => b.number - a.number))
   },
 
+  async createVersion(exhibitId: string): Promise<Version> {
+    await delay()
+    const exhibit = getExhibitById(exhibitId)
+    const existingVersions = versions.filter((v) => v.exhibitId === exhibitId)
+    const maxNumber = existingVersions.reduce((max, v) => Math.max(max, v.number), 0)
+    const prevVersion = existingVersions.find((v) => v.id === exhibit.currentVersionId) || existingVersions[0]
+    const newVersion: Version = {
+      id: nextId('v'),
+      exhibitId,
+      number: maxNumber + 1,
+      status: 'draft' as VersionStatus,
+      sourceText: prevVersion?.sourceText ?? '',
+      adaptedText: prevVersion?.adaptedText ?? '',
+      updatedAt: new Date().toISOString(),
+    }
+    versions.unshift(newVersion)
+    exhibit.currentVersionId = newVersion.id
+    saveState()
+    pushAuditEvent('version.created', `Created v${newVersion.number} for ${exhibitId}`, 'admin')
+    return clone(newVersion)
+  },
+
   async listReviewComments(versionId: string): Promise<ReviewComment[]> {
     await delay()
     return clone(reviewComments.filter((comment) => comment.versionId === versionId))
